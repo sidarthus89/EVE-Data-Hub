@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trade Route – EVE Data Hub</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+    <link rel="stylesheet" href="./css/tradeRoute.css" />
+
+</head>
+
+<body>
+    <nav class="main-nav" role="navigation">
+        <div class="nav-left">
+            <a href="index.html" class="nav-title">
+                <img src="./assets/icons/searchmarket.png" alt="" class="nav-icon" loading="lazy" width="32"
+                    height="32">
+                EVE Data Hub
+            </a>
+        </div>
+        <div class="nav-links">
+            <a href="market.html">Market</a>
+            <a href="appraisal.html">Appraisal</a>
+            <a href="heat-map.html">Heat Map</a>
+            <div class="nav-dropdown" role="menu" aria-haspopup="true" aria-expanded="false">
+                <span class="nav-dropdown-label" tabindex="0">Top 10 ▾</span>
+                <div class="nav-dropdown-menu" role="menu">
+                    <a href="top10/buyers.html" role="menuitem">Buyers</a>
+                    <a href="top10/sellers.html" role="menuitem">Sellers</a>
+                    <a href="top10/items.html" role="menuitem">Items</a>
+                </div>
+            </div>
+
+            <a href="trade-route.html" class="active">Trade Route</a>
+            <a href="downloads/test.txt" download class="download-btn">Download App</a>
+        </div>
+    </nav>
+
+    <main class="content">
+        <div class="market-layout">
+            <!-- Tables -->
+            <section id="marketTables">
+                <div id="itemHeader" class="item-header">
+                    <img id="itemIcon" src="./assets/icons/default.png" alt="Item Icon" class="item-icon" />
+                    <div class="item-info">
+                        <div id="itemBreadcrumb" class="item-breadcrumb">Category / Subcategory</div>
+                        <div id="itemName" class="item-name">Item Name</div>
+                        <span id="globalBadge" style="display:none; color:#0e83ae; font-weight:bold; margin-left: 8px;">
+                            🌐 Global Market
+                        </span>
+                    </div>
+                    <button id="tabMarket" class="sidebar-tab active">+ Add to Quickbar</button>
+                </div>
+
+                <div class="market-section">
+                    <h2 class="market-title">Sellers</h2>
+                    <div class="market-table-wrapper">
+                        <table id="sellersTable" class="market-table">
+                            <thead>
+                                <th class="resizable" data-sort="quantity">Quantity<div class="resizer"></div>
+                                </th>
+                                <th class="resizable" data-sort="price">Price<div class="resizer"></div>
+                                </th>
+                                <th class="resizable" data-sort="location">Location<div class="resizer"></div>
+                                </th>
+                                <th class="resizable" data-sort="expires">Expires in<div class="resizer"></div>
+                                </th>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+
+                    </div>
+                </div>
+
+                <hr class="market-divider" />
+
+                <div class="market-section">
+                    <h2 class="market-title">Buyers</h2>
+                    <div class="market-table-wrapper">
+                        <table id="buyersTable" class="market-table">
+                            <thead>
+                                <tr>
+                                    <th class="resizable" data-sort="quantity">Quantity<div class="resizer"></div>
+                                    </th>
+                                    <th class="resizable" data-sort="price">Price<div class="resizer"></div>
+                                    </th>
+                                    <th class="resizable" data-sort="range">Range (jumps)<div class="resizer"></div>
+                                    </th>
+                                    <th class="resizable" data-sort="location">Location<div class="resizer"></div>
+                                    </th>
+                                    <th class="resizable" data-sort="minVolume">Min Volume<div class="resizer"></div>
+                                    </th>
+                                    <th class="resizable" data-sort="expires">Expires in<div class="resizer"></div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <script type="module" src="core/js/init.js"></script>
+
+    </main>
+</body>
+
+</html>
