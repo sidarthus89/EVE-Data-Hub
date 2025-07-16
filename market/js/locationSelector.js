@@ -1,7 +1,10 @@
-// 🌍 locationSelector.js
-// Populates region, constellation, and system dropdowns based on appState
+// 🌍 Location Selector Module
+// Controls region, constellation, and system dropdowns and triggers data updates
 
 import { APP_CONFIG, appState, elements } from './marketConfig.js';
+import { fetchMarketOrders } from './itemPrices.js'; // 🟢 For current buy/sell orders
+import { fetchMarketHistory } from './itemPriceHistory.js';
+import { renderScopedHistoryChart } from './historyChart_Slider.js'; // ← for chart rendering
 
 // 🌎 Initialize Region Dropdown
 export function initializeDropdowns() {
@@ -19,32 +22,47 @@ export function initializeDropdowns() {
     disableAndReset(elements.systemSelector, 'Select a system');
 }
 
-// 🌌 Populate Constellation Dropdown on Region Change
-export function handleRegionChange() {
-    const selectedRegion = elements.regionSelector.value;
+// 🌌 Handle Region Selection
+export async function handleRegionChange() {
+    const selectedRegionName = elements.regionSelector.value;
 
     disableAndReset(elements.constellationSelector, 'Select a constellation');
     disableAndReset(elements.systemSelector, 'Select a system');
-    if (selectedRegion === 'all') return;
 
-    const regionData = appState.locations[selectedRegion];
-    if (!regionData) return;
+    // 💾 Update region in state
+    const selectedRegionData = appState.locations[selectedRegionName];
+    const selectedRegionID = selectedRegionData?.regionID || APP_CONFIG.DEFAULT_REGION_ID;
+    appState.selectedRegionID = selectedRegionID;
 
-    const constellationNames = Object.keys(regionData)
-        .filter(key => key !== 'regionID')
-        .sort();
+    // ⛅ Populate constellations if not "All"
+    if (selectedRegionName !== 'all' && selectedRegionData) {
+        const constellationNames = Object.keys(selectedRegionData)
+            .filter(key => key !== 'regionID')
+            .sort();
 
-    constellationNames.forEach(name => {
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = name;
-        elements.constellationSelector.appendChild(option);
-    });
+        constellationNames.forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            elements.constellationSelector.appendChild(option);
+        });
 
-    elements.constellationSelector.disabled = false;
+        elements.constellationSelector.disabled = false;
+    }
+
+    // 🔄 If an item is selected, refresh orders + tables
+    const typeID = appState.selectedTypeID;
+    if (typeID) {
+        try {
+            await fetchMarketOrders(typeID, selectedRegionID);
+            renderMarketOrders(typeID);
+        } catch (err) {
+            console.error(`Failed to fetch market orders for region ${selectedRegionID}:`, err);
+        }
+    }
 }
 
-// 🌠 Populate System Dropdown on Constellation Change
+// 🌠 Handle Constellation Selection
 export function handleConstellationChange() {
     const selectedRegion = elements.regionSelector.value;
     const selectedConstellation = elements.constellationSelector.value;
@@ -70,7 +88,7 @@ export function handleConstellationChange() {
     elements.systemSelector.disabled = false;
 }
 
-// 🔧 Utility: Reset a dropdown with placeholder
+// 🔧 Utility: Reset dropdown
 function disableAndReset(selectElement, placeholder) {
     selectElement.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
     selectElement.disabled = true;

@@ -4,9 +4,11 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Search – EVE Data Hub</title>
-    <link rel="stylesheet" href="assets/css/styles.css" />
-    <link rel="stylesheet" href="market/css/market.css" />
+    <title>Market – EVE Data Hub</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="market/css/marketOther.css" />
+    <link rel="stylesheet" href="market/css/marketLeft.css" />
+    <link rel="stylesheet" href="market/css/marketRight.css" />
 </head>
 
 <body>
@@ -64,80 +66,113 @@
                 <ul id="menuList" class="menuList menuListtop"></ul>
             </aside>
 
-            <!-- 📊 Main Market Tables -->
-            <section id="marketTables">
-                <div id="itemHeader" class="item-header">
+
+            <!-- 📦 Item Viewer Container -->
+            <section class="itemViewer">
+
+                <!-- 📊 Item Header & View Toggle -->
+                <div id="itemViewerHeader" class="item-viewer-header hidden">
                     <img id="itemIcon" src="./assets/icons/default.png" alt="Item Icon" class="item-icon" />
                     <div class="item-info">
                         <div id="itemBreadcrumb" class="item-breadcrumb">Category / Subcategory</div>
                         <div id="itemName" class="item-name">Item Name</div>
                     </div>
+
+                    <div class="view-toggle">
+                        <button id="viewMarketBtn" class="view-tab active">Market Orders</button>
+                        <button id="viewHistoryBtn" class="view-tab">Price History</button>
+                    </div>
+
                     <button id="tabMarket" class="sidebar-tab active">+ Add to Quickbar</button>
                 </div>
 
-                <!-- Sellers Section -->
-                <div class="market-section">
-                    <h2 class="market-title">
-                        Sellers
-                        <span id="sellersCount" class="order-count"></span>
-                    </h2>
-
-                    <div class="market-table-wrapper">
-                        <table id="sellersTable" class="market-table">
-                            <thead>
-                                <tr>
-                                    <th class="resizable" data-sort="quantity">Quantity<div class="resizer"></div>
-                                    </th>
-                                    <th class="resizable" data-sort="price">Price<div class="resizer"></div>
-                                    </th>
-                                    <th class="resizable" data-sort="location">Location<div class="resizer"></div>
-                                    </th>
-                                    <th class="resizable" data-sort="expires">Expires in<div class="resizer"></div>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                <!-- 📊 Live Price Tables -->
+                <section id="itemPriceTables" class="item-view">
+                    <!-- Sellers Section -->
+                    <div class="market-section">
+                        <h2 class="market-title">
+                            Sellers <span id="sellersCount" class="order-count"></span>
+                        </h2>
+                        <div class="market-table-wrapper">
+                            <table id="sellersTable" class="market-table">
+                                <thead>
+                                    <tr>
+                                        <th class="resizable" data-sort="quantity">Quantity<div class="resizer"></div>
+                                        </th>
+                                        <th class="resizable" data-sort="price">Price<div class="resizer"></div>
+                                        </th>
+                                        <th class="resizable" data-sort="location">Location<div class="resizer"></div>
+                                        </th>
+                                        <th class="resizable" data-sort="expires">Expires in<div class="resizer"></div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div class="table-footer">
+                            <div id="sellersPagination" class="pagination"></div>
+                        </div>
                     </div>
-                    <div class="table-footer">
-                        <div id="sellersPagination" class="pagination"></div>
-                    </div>
-                </div>
 
-                <hr class="market-divider" />
+                    <hr class="market-divider" />
 
-                <!-- Buyers Section -->
-                <div class="market-section">
-                    <h2 class="market-title">
-                        Buyers
-                        <span id="buyersCount" class="order-count"></span>
-                    </h2>
+                    <!-- Buyers Section -->
+                    <div class="market-section">
+                        <h2 class="market-title">
+                            Buyers <span id="buyersCount" class="order-count"></span>
+                        </h2>
+                        <div class="market-table-wrapper">
+                            <table id="buyersTable" class="market-table">
+                                <thead>
+                                    <tr>
+                                        <th class="resizable" data-sort="quantity">Quantity<div class="resizer"></div>
+                                        </th>
+                                        <th class="resizable" data-sort="price">Price<div class="resizer"></div>
+                                        </th>
+                                        <th class="resizable" data-sort="range">Range (jumps)<div class="resizer"></div>
+                                        </th>
+                                        <th class="resizable" data-sort="location">Location<div class="resizer"></div>
+                                        </th>
+                                        <th class="resizable" data-sort="minVolume">Min Volume<div class="resizer">
+                                            </div>
+                                        </th>
+                                        <th class="resizable" data-sort="expires">Expires in<div class="resizer"></div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div class="table-footer">
+                            <div id="buyersPagination" class="pagination"></div>
+                        </div>
+                    </div>
+                </section>
 
-                    <div class="market-table-wrapper">
-                        <table id="buyersTable" class="market-table">
-                            <thead>
-                                <tr>
-                                    <th class="resizable" data-sort="quantity">Quantity<div class="resizer"></div>
-                                    </th>
-                                    <th class="resizable" data-sort="price">Price<div class="resizer"></div>
-                                    </th>
-                                    <th class="resizable" data-sort="range">Range (jumps)<div class="resizer"></div>
-                                    </th>
-                                    <th class="resizable" data-sort="location">Location<div class="resizer"></div>
-                                    </th>
-                                    <th class="resizable" data-sort="minVolume">Min Volume<div class="resizer"></div>
-                                    </th>
-                                    <th class="resizable" data-sort="expires">Expires in<div class="resizer"></div>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                <!-- 📈 Price History Section -->
+                <section id="itemHistorySection" class="item-view market-history hidden">
+                    <h2 class="market-title">30-Day Price History</h2>
+                    <div class="history-chart-wrapper">
+                        <div class="chart-container">
+                            <canvas id="historyChart"></canvas>
+                        </div>
+                        <div id="navigatorWrapper">
+                            <canvas id="navigatorChart"></canvas>
+                            <div id="scopeOverlay"></div>
+                        </div>
+                        <div class="chart-range-slider">
+                            <span class="range-label">Range:</span>
+                            <div class="dual-range-container">
+                                <div class="dual-range-track"></div>
+                                <div class="dual-range-selection" id="selection"></div>
+                                <div class="dual-range-handle" id="leftHandle"></div>
+                                <div class="dual-range-handle" id="rightHandle"></div>
+                            </div>
+                            <span class="range-label" id="rangeDisplay">80 days</span>
+                        </div>
                     </div>
-                    <div class="table-footer">
-                        <div id="buyersPagination" class="pagination"></div>
-                    </div>
-                </div>
+                </section>
             </section>
         </div>
 
@@ -145,8 +180,10 @@
             <div id="priceTicker"></div>
         </div>
 
-
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
         <script type="module" src="market/js/marketMain.js"></script>
+
     </main>
 </body>
 

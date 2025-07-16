@@ -1,6 +1,7 @@
 import { APP_CONFIG, elements } from "./marketConfig.js";
 import { getRegionIDByName } from "./locationSelector.js";
-import { fetchMarketOrders } from "./marketTables.js";
+import { fetchMarketOrders } from "./itemPrices.js";
+import { fetchMarketHistory } from "./itemPriceHistory.js";
 
 // 🚀 Shared Loader for Type + Region
 function loadItem(typeID, regionName) {
@@ -15,14 +16,7 @@ function loadItem(typeID, regionName) {
             : getRegionIDByName(regionName);
 
     fetchMarketOrders(typeID, regionID);
-}
-
-// 🧭 Restore Last Selection on Reload
-export function restorePreviousSelection() {
-    const typeID = parseInt(localStorage.getItem("selectedTypeID"), 10);
-    const region = localStorage.getItem("selectedRegion");
-
-    loadItem(typeID, region);
+    fetchMarketHistory(typeID, regionID);
 }
 
 // 👁️ Region Selector Visibility Toggles

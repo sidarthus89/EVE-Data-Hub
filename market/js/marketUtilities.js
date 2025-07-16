@@ -14,8 +14,8 @@ export function getGroupIcon(groupObject) {
 }
 
 // 💱 Formatters
-export function formatExpires(duration) {
-    return `${duration} days`;
+export function formatExpires(days) {
+    return `${days} ${days === 1 ? 'day' : 'days'}`;
 }
 
 export function formatISK(value) {
@@ -168,4 +168,7 @@ export function cacheElements() {
     elements.regionSelector = document.getElementById('regionSelector');
     elements.constellationSelector = document.getElementById('constellationSelector');
     elements.systemSelector = document.getElementById('systemSelector');
+    elements.viewMarketBtn = document.getElementById('viewMarketBtn');
+    elements.viewHistoryBtn = document.getElementById('viewHistoryBtn');
+
 }

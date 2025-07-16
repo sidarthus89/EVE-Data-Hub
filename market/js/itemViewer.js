@@ -62,10 +62,18 @@ export function findItemBreadcrumb(typeID) {
 }
 
 // 🖱️ UI Selection Logic
+
 export function selectItem(typeID) {
     updateItemHeader(typeID);
     localStorage.setItem('selectedTypeID', typeID);
+    appState.selectedTypeID = typeID;
 
     const item = appState.flatItemList.find(i => i.type_id === typeID);
     if (elements.searchBox) elements.searchBox.value = item?.name || '';
+
+    // ✅ Show viewer header
+    const viewerHeader = document.getElementById('itemViewerHeader');
+    if (viewerHeader?.classList.contains('hidden')) {
+        viewerHeader.classList.remove('hidden');
+    }
 }

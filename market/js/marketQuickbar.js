@@ -1,4 +1,4 @@
-import { appState, elements } from "./marketConfig.js"
+import { appState, elements } from "./marketConfig.js";
 import { selectItem } from "./itemViewer.js";
 
 // 📋 Render the Quickbar Panel
@@ -34,11 +34,11 @@ export function renderQuickbar(show) {
     quickbarEl.innerHTML = "";
 
     if (show) {
-        const favorites = appState.favoritedItems || [];
-        if (favorites.length === 0) {
+        const items = appState.quickbarItems || [];
+        if (items.length === 0) {
             quickbarEl.innerHTML = "<li style='padding: 6px 10px; color: #999;'>Your quickbar is empty.</li>";
         } else {
-            favorites.forEach(item => {
+            items.forEach(item => {
                 const li = document.createElement("li");
                 li.textContent = item.name;
                 li.className = "market-item";
@@ -58,7 +58,7 @@ function setupQuickbarActions() {
     const [exportBtn, importBtn, deleteBtn] = document.querySelectorAll(".qb-btn");
 
     exportBtn?.addEventListener("click", () => {
-        const data = JSON.stringify(appState.favoritedItems || [], null, 2);
+        const data = JSON.stringify(appState.quickbarItems || [], null, 2);
         navigator.clipboard.writeText(data)
             .then(() => console.log("Quickbar copied to clipboard"))
             .catch(err => console.warn("Clipboard error", err));
@@ -69,8 +69,8 @@ function setupQuickbarActions() {
         try {
             const data = JSON.parse(pasted);
             if (Array.isArray(data)) {
-                appState.favoritedItems = data;
-                localStorage.setItem("favoritedItems", JSON.stringify(data));
+                appState.quickbarItems = data;
+                localStorage.setItem("quickbarItems", JSON.stringify(data));
                 renderQuickbar(true);
             }
         } catch (err) {
@@ -80,8 +80,8 @@ function setupQuickbarActions() {
 
     deleteBtn?.addEventListener("click", () => {
         if (confirm("Clear all Quickbar items?")) {
-            appState.favoritedItems = [];
-            localStorage.setItem("favoritedItems", "[]");
+            appState.quickbarItems = [];
+            localStorage.setItem("quickbarItems", "[]");
             renderQuickbar(true);
         }
     });

@@ -1,7 +1,7 @@
 // 📰 marketTicker.js
 // Loads and renders scrolling ticker for global PLEX prices
 
-import { fetchAllRegionOrders } from './marketTables.js';
+import { fetchAllRegionOrders } from './itemPrices.js';
 
 const PLEX_TYPE_ID = 44992;
 
@@ -84,6 +84,4 @@ function renderTickerTape({ name, highestBuy, lowestSell, averagePrice }) {
     wrapper.style.animationDuration = `${duration}s`;
     wrapper.style.animationTimingFunction = 'linear';
     wrapper.style.animationIterationCount = 'infinite';
-
-    console.log(`[Ticker] Applied scrollStream animation at ${duration}s for width ${streamWidth}px`);
 }

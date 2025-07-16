@@ -22,7 +22,8 @@ export const appState = {
     selectedRegionID: null,
     selectedSystemID: null,
     selectedStationID: null,
-    favoritedItems: [] // Added for quickbar support
+    selectedTypeID: null,
+    quickbarItems: []
 };
 
 export const elements = {

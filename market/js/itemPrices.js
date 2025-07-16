@@ -1,4 +1,3 @@
-// 📊 marketTables.js
 // Renders dynamic buy/sell market data, supports sorting, resizing, pagination, and ticker summary
 
 import { APP_CONFIG, appState } from './marketConfig.js';
@@ -33,6 +32,16 @@ export function updateTicker(items) {
 
 // 🔍 Primary Order Entry Point
 export async function fetchMarketOrders(typeID, selectedRegion) {
+    if (!typeID) {
+        document.getElementById('sellersCount').textContent = '';
+        document.getElementById('buyersCount').textContent = '';
+        const sellerBody = document.querySelector('#sellersTable tbody');
+        const buyerBody = document.querySelector('#buyersTable tbody');
+        if (sellerBody) sellerBody.innerHTML = '';
+        if (buyerBody) buyerBody.innerHTML = '';
+        return;
+    }
+
     updateItemHeader(typeID);
 
     try {
@@ -46,7 +55,7 @@ export async function fetchMarketOrders(typeID, selectedRegion) {
 
         renderOrderTables(typeID, sellOrders, buyOrders);
     } catch (err) {
-        console.error('Failed to fetch market data:', err);
+        console.error('❌ Failed to fetch market data:', err);
     }
 }
 
@@ -91,6 +100,7 @@ export async function fetchAllRegionOrders(typeID) {
 // 📊 Table Rendering
 export function renderMarketTable(tableId, orders) {
     const table = document.getElementById(tableId);
+
     if (!table) return;
 
     const tbody = table.querySelector('tbody');
@@ -123,18 +133,45 @@ export function renderMarketTable(tableId, orders) {
 
 // 📋 Wrapper: Populate All Tables
 function renderOrderTables(typeID, sellOrders, buyOrders) {
-    document.getElementById('sellersCount').textContent = `(${sellOrders.length.toLocaleString()} orders)`;
-    document.getElementById('buyersCount').textContent = `(${buyOrders.length.toLocaleString()} orders)`;
+    const sellersTableBody = document.querySelector('#sellersTable tbody');
+    const buyersTableBody = document.querySelector('#buyersTable tbody');
+    const sellersCountEl = document.getElementById('sellersCount');
+    const buyersCountEl = document.getElementById('buyersCount');
 
+    // 🛑 Handle case with no data
+    if (!typeID || (!sellOrders.length && !buyOrders.length)) {
+        sellersCountEl.textContent = '(0 orders)';
+        buyersCountEl.textContent = '(0 orders)';
+
+        if (sellersTableBody) {
+            sellersTableBody.innerHTML = '<tr><td colspan="4" class="empty-row">No seller orders available.</td></tr>';
+        }
+
+        if (buyersTableBody) {
+            buyersTableBody.innerHTML = '<tr><td colspan="6" class="empty-row">No buyer orders available.</td></tr>';
+        }
+
+        return;
+    }
+
+    // ✅ Display actual order counts
+    sellersCountEl.textContent = `(${sellOrders.length.toLocaleString()} orders)`;
+    buyersCountEl.textContent = `(${buyOrders.length.toLocaleString()} orders)`;
+
+    // 🎯 Render seller table and pagination
     renderMarketTable('sellersTable', sellOrders.slice(0, RESULTS_PER_PAGE));
     renderPagination('sellersPagination', sellOrders, 1, 'sellersTable');
+    setupTableSort('sellersTable', true, 1);
 
+    // 🎯 Render buyer table and pagination
     renderMarketTable('buyersTable', buyOrders.slice(0, RESULTS_PER_PAGE));
     renderPagination('buyersPagination', buyOrders, 1, 'buyersTable');
-
-    updateItemHeader(typeID);
-    setupTableSort('sellersTable', true, 1);
     setupTableSort('buyersTable', false, 1);
+
+    // 🖼️ Refresh header content
+    updateItemHeader(typeID);
+
+    document.getElementById('itemPriceTables')?.classList.add('visible');
 }
 
 // 📄 Pagination Controller
