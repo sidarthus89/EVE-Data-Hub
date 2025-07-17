@@ -6,19 +6,25 @@ let debounceTimer;
 // 📈 Fetch 365-day price history for a single item
 export async function fetchMarketHistory(typeID, selectedRegion) {
     const regionID =
-        selectedRegion === 'all'
-            ? APP_CONFIG.DEFAULT_REGION_ID
-            : appState.locations?.regions?.find(r => r.regionName === selectedRegion)?.regionID;
+        !isNaN(selectedRegion)
+            ? Number(selectedRegion)
+            : appState.locations?.regions?.find(r => r.regionName === selectedRegion)?.regionID ??
+            APP_CONFIG.DEFAULT_REGION_ID;
 
     const url = `${APP_CONFIG.ESI_BASE_URL}${regionID}/history/?type_id=${typeID}`;
+
     try {
         const response = await fetch(url);
-        if (!response.ok) throw new Error('Failed to fetch history');
+        if (!response.ok) throw new Error(`Failed to fetch history (HTTP ${response.status})`);
+
         const data = await response.json();
+        if (!Array.isArray(data)) throw new Error(`Invalid history format for ${typeID}`);
+
         appState.marketHistory = appState.marketHistory || {};
         appState.marketHistory[typeID] = data.slice(-365);
     } catch (err) {
         console.error(`Failed history for ${typeID}:`, err);
+        appState.marketHistory = appState.marketHistory || {};
         appState.marketHistory[typeID] = [];
     }
 }

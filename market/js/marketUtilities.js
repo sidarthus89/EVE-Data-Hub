@@ -170,5 +170,4 @@ export function cacheElements() {
     elements.systemSelector = document.getElementById('systemSelector');
     elements.viewMarketBtn = document.getElementById('viewMarketBtn');
     elements.viewHistoryBtn = document.getElementById('viewHistoryBtn');
-
 }

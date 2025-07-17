@@ -31,8 +31,8 @@ export async function handleRegionChange() {
 
     // 💾 Update region in state
     const selectedRegionData = appState.locations[selectedRegionName];
-    const selectedRegionID = selectedRegionData?.regionID || APP_CONFIG.DEFAULT_REGION_ID;
-    appState.selectedRegionID = selectedRegionID;
+    const selectedRegionID =
+        selectedRegionData?.regionID || APP_CONFIG.DEFAULT_REGION_ID;
 
     // ⛅ Populate constellations if not "All"
     if (selectedRegionName !== 'all' && selectedRegionData) {
@@ -96,5 +96,6 @@ function disableAndReset(selectElement, placeholder) {
 
 // 🔍 Region ID Lookup by Name
 export function getRegionIDByName(name) {
-    return appState.locations?.[name]?.regionID || APP_CONFIG.DEFAULT_REGION_ID;
+    return appState.locations?.[name]?.regionID ?? null; // 👈 fallback removed
+    // return appState.locations?.[name]?.regionID || APP_CONFIG.DEFAULT_REGION_ID; // 🗃️ legacy fallback commented out
 }

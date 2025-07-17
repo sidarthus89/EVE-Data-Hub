@@ -90,6 +90,7 @@
     position: absolute;
     top: calc(100% + 4px);
     left: 0;
+    text-align: left;
     width: 100%;
     max-height: 550px;
     background-color: #1c1c1c;
@@ -107,6 +108,7 @@
 #searchResults li {
     padding: 6px 12px;
     font-size: 14px;
+    text-align: left;
     cursor: pointer;
     white-space: nowrap;
     overflow: hidden;
@@ -178,6 +180,11 @@
     list-style-type: none;
 }
 
+#menuList li.market-item:hover {
+    background-color: #0e1f24;
+    color: #fff;
+}
+
 #menuList li.active {
     background-color: #555;
     color: #fff;
@@ -230,7 +237,7 @@ li.collapsible {
 ul.subcategories li {
     padding: 5px 10px;
     font-size: 13px;
-    color: #bbb;
+    color: #fff;
 }
 
 .subcategory-header {

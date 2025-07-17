@@ -60,6 +60,8 @@ export async function fetchMarketOrders(typeID, selectedRegion) {
 }
 
 // 🧭 Region ID Resolver
+
+
 function resolveRegionID(regionName) {
     return (
         appState.locations?.regions?.find(r => r.regionName === regionName)?.regionID ||

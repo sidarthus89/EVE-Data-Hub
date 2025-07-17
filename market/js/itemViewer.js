@@ -64,6 +64,7 @@ export function findItemBreadcrumb(typeID) {
 // 🖱️ UI Selection Logic
 
 export function selectItem(typeID) {
+    console.log("✔ selectItem fired:", typeID);
     updateItemHeader(typeID);
     localStorage.setItem('selectedTypeID', typeID);
     appState.selectedTypeID = typeID;
@@ -72,8 +73,12 @@ export function selectItem(typeID) {
     if (elements.searchBox) elements.searchBox.value = item?.name || '';
 
     // ✅ Show viewer header
-    const viewerHeader = document.getElementById('itemViewerHeader');
-    if (viewerHeader?.classList.contains('hidden')) {
-        viewerHeader.classList.remove('hidden');
+    const viewerHeader = document.getElementById("itemViewerHeader");
+    console.log("Viewer found?", !!viewerHeader);
+    console.log("Viewer classList before:", viewerHeader?.classList);
+
+    if (viewerHeader?.classList.contains("hidden")) {
+        viewerHeader.classList.remove("hidden");
+        console.log("Viewer classList after:", viewerHeader.classList);
     }
 }
