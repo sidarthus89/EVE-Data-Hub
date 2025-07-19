@@ -1,5 +1,5 @@
-// marketConfig.js
-// Provides constants, shared app state, and DOM references for the market module
+// 📦 marketConfig.js
+// Provides constants, shared state, and DOM references for the market module
 
 export const APP_CONFIG = {
     DATA_PATH: "./market/data/",
@@ -19,11 +19,19 @@ export const appState = {
     marketMenu: {},
     flatItemList: [],
     currentSortState: {},
-    selectedRegionID: null,
-    selectedSystemID: null,
-    selectedStationID: null,
+
+    // 🔄 Selection Context
     selectedTypeID: null,
-    quickbarItems: []
+    selectedStationID: null,
+    quickbarItems: [],
+
+    // 🌐 Location Details (now managed via RegionSelector)
+    selectedRegionName: null,
+    selectedRegionID: null,
+    selectedConstellationName: null,
+    selectedConstellationID: null,
+    selectedSystemName: null,
+    selectedSystemID: null
 };
 
 export const elements = {

@@ -1,45 +1,55 @@
+// 📦 itemDispatcher.js
+// Handles item selection, triggers order/history/chart updates
+
 import { selectItem } from "./itemViewer.js";
-import { fetchMarketOrders } from "./itemPrices.js";
+import { fetchMarketOrders } from "./marketTables.js";
 import { fetchMarketHistory } from "./itemPriceHistory.js";
-import { renderScopedHistoryChart, setupSliderChartSync } from "./historyChart_Slider.js";
-import { appState, APP_CONFIG } from "./marketConfig.js";
+import {
+    renderScopedHistoryChart,
+    setupSliderChartSync
+} from "./historyChart_Slider.js";
+import { appState } from "./marketConfig.js";
 import { setHistoryViewActive } from "./itemPriceHistory.js";
+import { RegionSelector } from "../../globals/js/regionSelector.js";
 
 export async function handleItemSelection(typeID) {
     if (!typeID || isNaN(typeID)) return;
 
-    // 🧠 Update App State
+    // 🧠 Update state and UI
     appState.selectedTypeID = typeID;
     selectItem(typeID);
 
-    // 👁️ Immediately reveal UI panels
+    // 🎛️ Reveal viewer and data panels
     const viewerHeader = document.getElementById('itemViewerHeader');
     if (viewerHeader) {
         viewerHeader.classList.remove('hidden');
-        viewerHeader.style.display = 'flex'; // or whatever layout you need
+        viewerHeader.style.display = 'flex';
     }
+
     document.getElementById('itemPriceTables')?.classList.remove('hidden');
     document.getElementById('itemHistorySection')?.classList.remove('hidden');
-    setHistoryViewActive(false); // Default to Market view
+    setHistoryViewActive(false);
 
-    // 🌍 Safely resolve region ID
-    const rawRegion = localStorage.getItem("selectedRegion");
-    const resolvedRegion =
-        !isNaN(rawRegion) && rawRegion !== null
-            ? Number(rawRegion)
-            : appState.selectedRegionID ?? APP_CONFIG.DEFAULT_REGION_ID;
+    // 🌍 Resolve location context
+    const regionName = RegionSelector.getLocationSummary().region || 'all';
 
-    // 🔄 Fetch market data and price history
+    // 📊 Fetch market data
     try {
-        fetchMarketOrders(typeID, resolvedRegion);
-        await fetchMarketHistory(typeID, resolvedRegion);
+        await Promise.all([
+            fetchMarketOrders(typeID, regionName),
+            fetchMarketHistory(typeID, regionName)
+        ]);
     } catch (err) {
-        console.warn(`Data fetch failed for ${typeID}:`, err);
+        console.warn(`❌ Data fetch failed for item ${typeID} in region "${regionName}":`, err);
+        return;
     }
 
-    // 📈 Render chart only if history panel is active
-    const isHistoryActive = document.getElementById('itemHistorySection')?.classList.contains('visible');
-    if (isHistoryActive) {
+    // 📈 Render history chart (only if visible)
+    const isHistoryVisible = document
+        .getElementById('itemHistorySection')
+        ?.classList.contains('visible');
+
+    if (isHistoryVisible) {
         renderScopedHistoryChart(typeID);
         setupSliderChartSync(typeID);
     }

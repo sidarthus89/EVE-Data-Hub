@@ -20,13 +20,10 @@
     position: sticky;
     top: 0;
     z-index: 5;
-    padding: 16px;
 }
 
 /* ── Location Selectors ───────── */
-#regionSelector,
-#constellationSelector,
-#systemSelector {
+#regionSelector {
     width: 100%;
     padding: 8px;
     margin-bottom: 10px;
@@ -153,6 +150,7 @@
 #menuList {
     flex: 1;
     overflow-y: auto;
+
     padding: 0;
     margin: 0;
     scrollbar-width: thin;
@@ -172,7 +170,7 @@
 }
 
 #menuList li {
-    padding: 4px 8px;
+    padding: 4px 0px;
     font-size: 13px;
     cursor: pointer;
     color: #7e7e7e;
@@ -192,7 +190,7 @@
 }
 
 li.collapsible {
-    padding: 8px 12px;
+    padding: 8px 1px;
     cursor: pointer;
     user-select: none;
 }
@@ -208,7 +206,6 @@ li.collapsible {
 .group-label-wrapper {
     display: flex;
     align-items: center;
-    padding: 2px 4px;
     font-size: 13px;
 }
 
@@ -253,10 +250,49 @@ ul.subcategories li {
 .market-item {
     padding: 3px 10px;
     font-size: 12px;
+    display: flex;
+    align-items: center;
+    padding: 6px 8px;
+    position: relative;
+    gap: 6px;
+    /* adds spacing between label and button */
 }
 
 .market-item:hover,
 .group-label-wrapper:hover {
     background-color: #0e1f24;
+    color: #fff;
+}
+
+.market-item:hover .quickbar-btn {
+    opacity: 1;
+}
+
+.market-item span {
+    display: inline-block;
+    margin-right: 6px;
+    flex-grow: 0;
+}
+
+.quickbar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    color: #ccc;
+    border-radius: 2px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    line-height: 1;
+    /* Prevents extra vertical space */
+    padding: 0;
+}
+
+.quickbar-remove:hover {
     color: #fff;
 }

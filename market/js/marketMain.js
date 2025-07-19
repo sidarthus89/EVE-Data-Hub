@@ -6,15 +6,23 @@ import { cacheElements } from './marketUtilities.js';
 // 🧱 Initial Loaders
 import { loadLocations, loadStations, loadMarketMenu } from './marketDataFetcher.js';
 import { loadTickerData } from './marketTicker.js';
+import { fetchMarketOrders } from './marketTables.js';
 
 // 📦 UI & Interaction Modules
-import { initializeDropdowns, handleRegionChange, handleConstellationChange } from './locationSelector.js';
 import { initializeMarketMenu } from './marketTree.js';
 import { setupEventListeners } from './marketEvents.js';
 import { renderQuickbar } from './marketQuickbar.js';
 import { initializeSearch } from './marketSearch.js';
 import { setHistoryViewActive, fetchMarketHistory } from './itemPriceHistory.js';
-import { renderScopedHistoryChart, setupSliderChartSync, renderNavigatorChart, initializeDualRangeSlider } from './historyChart_Slider.js';
+import {
+    renderScopedHistoryChart,
+    setupSliderChartSync,
+    renderNavigatorChart,
+    initializeDualRangeSlider
+} from './historyChart_Slider.js';
+
+// 🌍 Global Location Logic
+import { RegionSelector } from '../../globals/js/regionSelector.js';
 
 // 🌐 Expose API Globals
 window.appState = appState;
@@ -39,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         localStorage.removeItem('selectedTypeID');
 
         // 🎛️ Initialize UI Components
-        initializeDropdowns();
+        RegionSelector.initializeDropdown();
         initializeMarketMenu();
         renderQuickbar(false);
         setupEventListeners();
@@ -52,24 +60,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             leftValue: 0,
             rightValue: 30,
             onChange: (values) => {
-                console.log('Slider changed:', values);
                 window.chartSlider = chartSlider;
-                if (appState.selectedTypeID) renderScopedHistoryChart(appState.selectedTypeID);
+                console.log('Slider changed:', values);
+                if (appState.selectedTypeID) {
+                    renderScopedHistoryChart(appState.selectedTypeID);
+                }
             }
         });
         window.chartSlider = chartSlider;
 
         // 📈 Initial Ticker Load
         await loadTickerData();
-
-        // 🌐 Region & Constellation Dropdown Hooks
-        elements.regionSelector.addEventListener('change', async e => {
-            const selectedRegionID = parseInt(e.target.value, 10);
-            await loadTickerData(selectedRegionID || null, true);
-            handleRegionChange();
-        });
-
-        elements.constellationSelector.addEventListener('change', handleConstellationChange);
 
         // 🖱️ History/Market Tab Switching
         elements.viewMarketBtn?.addEventListener('click', () => {
@@ -79,9 +80,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.viewHistoryBtn?.addEventListener('click', async () => {
             setHistoryViewActive(true);
             const typeID = appState.selectedTypeID;
-            const regionID = appState.selectedRegionID || 'all';
+            const regionName = RegionSelector.getLocationSummary().region || 'all';
             if (typeID) {
-                await fetchMarketHistory(typeID, regionID);
+                await fetchMarketHistory(typeID, regionName);
                 renderNavigatorChart(typeID);
                 renderScopedHistoryChart(typeID);
                 setupSliderChartSync(typeID);
@@ -111,4 +112,13 @@ function extractItemList(menu) {
         type_id: i.typeID,
         name: i.typeName
     }));
+}
+
+// 🔁 Reactive Order Fetcher
+function refreshOrders() {
+    const typeID = appState.selectedTypeID;
+    const regionName = RegionSelector.getLocationSummary().region || 'all';
+    if (typeID) {
+        fetchMarketOrders(typeID, regionName);
+    }
 }

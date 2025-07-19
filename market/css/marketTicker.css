@@ -1,0 +1,64 @@
+.market-ticker {
+    margin: 0;
+    padding: 0;
+    background: black;
+    font-family: monospace;
+}
+
+body {
+    margin: 2em 0;
+}
+
+.marquee {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    background: #444;
+    padding-bottom: 38.5px;
+    font-size: 18px;
+    font-weight: bold;
+    overflow: hidden;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.marquee__content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    white-space: nowrap;
+    /* Animation will be set dynamically by JavaScript */
+}
+
+.marquee__item {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+}
+
+.marquee__text {
+    display: inline-block;
+    flex-shrink: 0;
+    margin: 0;
+    padding-right: 32px;
+    text-transform: uppercase;
+}
+
+.marquee__text.highest {
+    color: #ff4455;
+    /* red */
+}
+
+.marquee__text.average {
+    color: #ffaa00;
+    /* yellow */
+}
+
+.marquee__text.lowest {
+    color: #00ff99;
+    /* green */
+}
+
+/* Keyframes will be injected dynamically by JavaScript */

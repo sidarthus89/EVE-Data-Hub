@@ -1,8 +1,33 @@
 import { appState, elements } from "./marketConfig.js";
 import { selectItem } from "./itemViewer.js";
 
+renderQuickbar(true); // Or toggle based on view state
+
+
+export function addToQuickbar(item) {
+    if (!item?.typeID || !item?.typeName) return;
+
+    const exists = (appState.quickbarItems || []).some(q => q.type_id === item.typeID);
+    if (exists) return;
+
+    const newEntry = {
+        type_id: item.typeID,
+        name: item.typeName
+    };
+
+    appState.quickbarItems = [...(appState.quickbarItems || []), newEntry];
+    localStorage.setItem("quickbarItems", JSON.stringify(appState.quickbarItems));
+    renderQuickbar(true);
+}
+
+
 // 📋 Render the Quickbar Panel
 export function renderQuickbar(show) {
+    if (!Array.isArray(appState.quickbarItems)) {
+        const stored = localStorage.getItem("quickbarItems");
+        appState.quickbarItems = stored ? JSON.parse(stored) : [];
+    }
+
     const container = document.getElementById("itemselector");
     let quickbarEl = document.getElementById("quickbarList");
     let headerRow = document.getElementById("quickbarHeader");
@@ -40,12 +65,28 @@ export function renderQuickbar(show) {
         } else {
             items.forEach(item => {
                 const li = document.createElement("li");
-                li.textContent = item.name;
                 li.className = "market-item";
-                li.addEventListener("click", () => selectItem(item.type_id));
                 li.dataset.typeId = item.type_id;
+
+                const removeBtn = document.createElement("button");
+                removeBtn.textContent = "×";
+                removeBtn.className = "quickbar-remove";
+                removeBtn.title = "Remove from Quickbar";
+                removeBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    appState.quickbarItems = appState.quickbarItems.filter(q => q.type_id !== item.type_id);
+                    localStorage.setItem("quickbarItems", JSON.stringify(appState.quickbarItems));
+                    renderQuickbar(true);
+                });
+
+                const label = document.createElement("span");
+                label.textContent = item.name;
+                label.addEventListener("click", () => selectItem(item.type_id));
+
+                li.append(removeBtn, label);
                 quickbarEl.appendChild(li);
             });
+
         }
         quickbarEl.style.display = "block";
     } else {

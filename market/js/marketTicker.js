@@ -1,87 +1,106 @@
-// 📰 marketTicker.js
-// Loads and renders scrolling ticker for global PLEX prices
-
 import { fetchAllRegionOrders } from './itemPrices.js';
 
 const PLEX_TYPE_ID = 44992;
 
-// 💱 Helpers
 function getAverage(orders) {
-    if (!orders.length) return 0;
-    const total = orders.reduce((sum, o) => sum + o.price, 0);
-    return total / orders.length;
+    return orders.length
+        ? orders.reduce((sum, o) => sum + o.price, 0) / orders.length
+        : 0;
 }
 
 function formatISK(value) {
-    const safeValue = typeof value === 'number' && !isNaN(value) ? value : 0;
-    return safeValue.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' ISK';
+    return (typeof value === 'number' && !isNaN(value) ? value : 0)
+        .toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' ISK';
 }
 
-// 🚀 Entry Point
-export async function loadTickerData() {
+async function loadTickerData() {
+    const container = document.querySelector('#plexTicker .marquee__content');
+    const marquee = document.querySelector('#plexTicker');
+    if (!container || !marquee) return;
+
     const orders = await fetchAllRegionOrders(PLEX_TYPE_ID);
     const buyOrders = orders.filter(o => o.is_buy_order);
     const sellOrders = orders.filter(o => !o.is_buy_order);
 
-    const highestBuy = Math.max(...buyOrders.map(o => o.price));
-    const lowestSell = Math.min(...sellOrders.map(o => o.price));
-    const averagePrice = getAverage([...buyOrders, ...sellOrders]);
-
-    const tickerStats = {
+    const stats = {
         name: 'PLEX',
-        highestBuy,
-        lowestSell,
-        averagePrice
+        highestBuy: Math.max(...buyOrders.map(o => o.price)),
+        lowestSell: Math.min(...sellOrders.map(o => o.price)),
+        averagePrice: getAverage([...buyOrders, ...sellOrders])
     };
 
-    renderTickerTape(tickerStats);
-}
-
-// 🎞️ Render Scrolling Ticker
-function renderTickerTape({ name, highestBuy, lowestSell, averagePrice }) {
-    const tickerContainer = document.getElementById('priceTicker');
-    if (!tickerContainer) return;
-
-    tickerContainer.innerHTML = '';
-
-    const wrapper = document.createElement('div');
-    wrapper.className = 'ticker-loop';
-
-    const stream = document.createElement('div');
-    stream.className = 'ticker-stream';
-
-    const segments = [
-        { label: 'Highest Buy', value: highestBuy, class: 'buy' },
-        { label: 'Lowest Sell', value: lowestSell, class: 'sell' },
-        { label: 'Average', value: averagePrice, class: 'avg' }
+    // Create the base content
+    const baseContent = [
+        { label: 'Highest Buy', value: stats.highestBuy, class: 'highest' },
+        { label: 'Average', value: stats.averagePrice, class: 'average' },
+        { label: 'Lowest Sell', value: stats.lowestSell, class: 'lowest' }
     ];
 
-    segments.forEach(({ label, value, class: cls }) => {
+    // Clear existing content
+    container.innerHTML = '';
+
+    // Create a single item container with all the text
+    const singleItem = document.createElement('div');
+    singleItem.className = 'marquee__item';
+
+    baseContent.forEach(({ label, value, class: cls }) => {
         const span = document.createElement('span');
-        span.className = `ticker-segment ${cls}`;
-        span.textContent = `${name} — ${label}: ${formatISK(value)}`;
-        stream.appendChild(span);
+        span.className = `marquee__text ${cls}`;
+        span.textContent = `${stats.name} — ${label}: ${formatISK(value)} • `;
+        singleItem.appendChild(span);
     });
 
-    // Create clone for seamless loop
-    const clone = stream.cloneNode(true);
-    wrapper.appendChild(stream);
-    wrapper.appendChild(clone);
-    tickerContainer.appendChild(wrapper);
+    // Add the single item to get its width
+    container.appendChild(singleItem);
 
-    // Force layout calculation immediately
-    const streamWidth = stream.offsetWidth;
+    // Force layout calculation
+    container.offsetWidth;
 
-    // Set the wrapper width to contain both streams
-    wrapper.style.width = `${streamWidth * 2}px`;
+    // Get the width of our content
+    const itemWidth = singleItem.offsetWidth;
+    const containerWidth = marquee.offsetWidth;
 
-    // Calculate animation duration based on single stream width
-    const speed = 64; // px/sec
-    const duration = streamWidth / speed;
+    // Calculate how many copies we need to fill the screen plus buffer for seamless loop
+    // For slower speeds, we need more copies to ensure no gaps
+    const numberOfCopies = Math.ceil((containerWidth / itemWidth) * 2) + 2;
 
-    // Apply animation immediately
-    wrapper.style.animationName = 'scrollStream';
-    wrapper.style.animationDuration = `${duration}s`;
-    wrapper.style.animationTimingFunction = 'linear';
-    wrapper.style.animationIterationCount = 'infinite';
+    // Create enough copies for seamless scrolling
+    for (let i = 1; i < numberOfCopies; i++) {
+        container.appendChild(singleItem.cloneNode(true));
+    }
+
+    // Set the animation speed - adjust this number to control speed
+    // Higher number = faster, lower number = slower
+    const speedFactor = 60; // Change this value to adjust speed
+    const duration = (itemWidth / speedFactor) + 's';
+
+    // Create a unique animation name and inject keyframes
+    const animationName = `marquee-scroll-${Date.now()}`;
+    const keyframes = `
+        @keyframes ${animationName} {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-${itemWidth}px); }
+        }
+    `;
+
+    // Remove any existing style element and add new one
+    const existingStyle = document.querySelector('#marquee-keyframes');
+    if (existingStyle) {
+        existingStyle.remove();
+    }
+
+    const styleElement = document.createElement('style');
+    styleElement.id = 'marquee-keyframes';
+    styleElement.textContent = keyframes;
+    document.head.appendChild(styleElement);
+
+    // Set the animation duration and name
+    container.style.animation = `${animationName} ${duration} linear infinite`;
 }
+
+// Initialize and refresh
+document.addEventListener('DOMContentLoaded', loadTickerData);
+window.addEventListener('resize', loadTickerData);
+setInterval(loadTickerData, 30000);
+
+export { loadTickerData };

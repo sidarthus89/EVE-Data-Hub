@@ -166,8 +166,6 @@ export function cacheElements() {
     elements.itemName = document.getElementById('itemName');
     elements.itemBreadcrumb = document.getElementById('itemBreadcrumb');
     elements.regionSelector = document.getElementById('regionSelector');
-    elements.constellationSelector = document.getElementById('constellationSelector');
-    elements.systemSelector = document.getElementById('systemSelector');
     elements.viewMarketBtn = document.getElementById('viewMarketBtn');
     elements.viewHistoryBtn = document.getElementById('viewHistoryBtn');
 }

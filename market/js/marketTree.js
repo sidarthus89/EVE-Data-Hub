@@ -4,6 +4,7 @@
 import { appState, elements } from './marketConfig.js';
 import { getGroupIcon } from './marketUtilities.js';
 import { handleItemSelection } from './itemDispatcher.js';
+import { addToQuickbar } from './marketQuickbar.js';
 
 // 🧠 Flatten all valid market items for global search
 export function buildFlatItemList(menuData) {
@@ -110,7 +111,17 @@ export function createSubMenu(groupObject) {
                 const label = document.createElement('span');
                 label.textContent = item.typeName?.trim();
 
-                itemLi.append(label);
+                const addBtn = document.createElement('button');
+                addBtn.textContent = '+';
+                addBtn.title = 'Add to Quickbar';
+                addBtn.className = 'quickbar-btn';
+                addBtn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    addToQuickbar(item); // You can pass typeID or full item object
+                });
+
+                itemLi.append(label, addBtn);
+
                 itemLi.addEventListener('click', () => {
                     if (item.typeID) handleItemSelection(item.typeID);
                 });

@@ -1,13 +1,14 @@
 // 🔍 marketSearch.js
-// Handles dynamic market item search, filtering, keyboard navigation, and contextual drill-down
+// Handles dynamic item search, filtering, keyboard navigation, and drill-down into market menu
 
 import { appState, elements, APP_CONFIG } from './marketConfig.js';
 import { handleItemSelection } from './itemDispatcher.js';
+import { RegionSelector } from '../../globals/js/regionSelector.js';
 
 const MIN_LENGTH = APP_CONFIG.SEARCH_MIN_LENGTH || 3;
 const MAX_RESULTS = APP_CONFIG.MAX_SEARCH_RESULTS || 25;
 
-// 🕒 Debounce input for smoother UX
+// 🕒 Debounce helper
 function debounce(fn, delay) {
     let timer;
     return function (...args) {
@@ -16,7 +17,7 @@ function debounce(fn, delay) {
     };
 }
 
-// 🚀 Initialize Search Field Behavior
+// 🚀 Initialize Search Behavior
 export function initializeSearch() {
     const input = elements.searchBox;
     const results = elements.searchResults;
@@ -37,10 +38,7 @@ export function initializeSearch() {
         const li = e.target.closest('li');
         if (!li?.dataset.typeid) return;
         const typeID = parseInt(li.dataset.typeid, 10);
-        handleItemSelection(typeID);
-        drillDownToItem(typeID);
-        input.value = '';
-        hideSearchResults();
+        onItemSelected(typeID);
     });
 
     document.addEventListener('click', e => {
@@ -50,7 +48,7 @@ export function initializeSearch() {
     });
 }
 
-// 🧠 Generate Filtered Search Results
+// 🔎 Filter and Render Search Results
 function renderSearchResults(query) {
     const results = elements.searchResults;
     results.innerHTML = '';
@@ -62,9 +60,7 @@ function renderSearchResults(query) {
 
     const exactMatch = matches.length === 1 && matches[0].name.toLowerCase() === query;
     if (exactMatch) {
-        const typeID = matches[0].type_id;
-        handleItemSelection(typeID);
-        drillDownToItem(typeID);
+        onItemSelected(matches[0].type_id);
         elements.searchBox.value = matches[0].name;
         hideSearchResults();
         return;
@@ -86,7 +82,7 @@ function renderSearchResults(query) {
     appState.isSearchActive = true;
 }
 
-// 🎯 Keyboard Navigation for Results List
+// 🎯 Handle Keyboard Navigation
 function handleKeyNavigation(e) {
     const results = elements.searchResults;
     const items = Array.from(results.querySelectorAll('li'));
@@ -99,8 +95,7 @@ function handleKeyNavigation(e) {
 
     if (e.key === 'Enter' && current?.dataset?.typeid) {
         const typeID = parseInt(current.dataset.typeid, 10);
-        handleItemSelection(typeID);
-        drillDownToItem(typeID);
+        onItemSelected(typeID);
         elements.searchBox.value = current.textContent;
         hideSearchResults();
         return;
@@ -117,14 +112,21 @@ function handleKeyNavigation(e) {
     }
 }
 
-// 🧼 Clear Search Results
+// 🎯 Item Selection Handler
+function onItemSelected(typeID) {
+    if (!typeID || isNaN(typeID)) return;
+    handleItemSelection(typeID);
+    drillDownToItem(typeID);
+}
+
+// 🧹 Hide Results
 function hideSearchResults() {
     elements.searchResults.innerHTML = '';
     elements.searchResults.classList.remove('visible');
     appState.isSearchActive = false;
 }
 
-// 🧭 Scroll and Expand to Selected Item in Menu
+// 🧭 Expand and Scroll to Item in Tree
 export function drillDownToItem(typeID) {
     const path = (function walk(node, trail = []) {
         if (Array.isArray(node)) {

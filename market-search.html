@@ -5,27 +5,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Market Search – EVE Data Hub</title>
-    <link rel="stylesheet" href="globals/css/styles.css">
-    <link rel="stylesheet" href="market/css/marketOther.css" />
+    <link rel="stylesheet" href="/globals/css/styles.css">
+    <link rel="stylesheet" href="market/css/marketTicker.css" />
     <link rel="stylesheet" href="market/css/marketLeft.css" />
     <link rel="stylesheet" href="market/css/marketRight.css" />
 </head>
 
 <body>
-    <div id="navContainer"></div>
-    <script src="./globals/js/loadGlobalNav.js" defer></script>
-
     <main class="content">
         <div class="market-layout">
             <!-- 🧭 Sidebar -->
             <aside id="itemselector">
                 <div id="sidebarHeader">
-                    <div id="locationSelectors">
-                        <select id="regionSelector"></select>
-                        <select id="constellationSelector" disabled></select>
-                        <select id="systemSelector" disabled></select>
-                    </div>
-
+                    <select id="regionSelector"></select>
                     <div id="searchWrapper">
                         <input type="text" id="searchBox" placeholder="Search items..." autocomplete="off" />
                         <ul id="searchResults" class="search-results"></ul>
@@ -155,21 +147,21 @@
             </section>
         </div>
 
-        <div class="ticker-tape">
-            <div id="priceTicker"></div>
+        <div class="marquee" id="plexTicker">
+            <div class="marquee__content">
+                <!-- Filled dynamically -->
+                <div class="marquee__copies" aria-hidden="true"></div>
+            </div>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
-        <script type="module" src="market/js/marketMain.js"></script>
-        <script src="/EVE-Data-Hub/globals/js/cookieConsent.js" defer></script>
-    </main>
-</body>
 
-<div id="cookieConsent" class="cookie-banner">
-    <p>We use cookies to improve your experience. By using this site, you accept our use of cookies. <a
-            href="/privacy.html">Learn more</a></p>
-    <button id="acceptCookies">Accept</button>
-</div>
+    </main>
+    <div id="layoutContainer"></div>
+    <script src="/globals/js/loadGlobalNav.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <script type="module" src="market/js/marketMain.js"></script>
+    <script src="/EVE-Data-Hub/globals/js/cookieConsent.js" defer></script>
+</body>
 
 </html>

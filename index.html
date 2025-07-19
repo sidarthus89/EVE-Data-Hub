@@ -8,29 +8,14 @@
         content="EVE Online market search tool for analyzing pricing trends across regions with real-time ESI data">
     <meta name="keywords" content="EVE Online, market, pricing, ESI, trading, analysis">
     <meta name="theme-color" content="#1a1a1a">
+    <link rel="stylesheet" href="/globals/css/styles.css">
 
     <title>EVE Data Hub</title>
 
-    <!-- Preload critical resources -->
-    <link rel="preload" href="globals/css/nav/styles.css" as="style">
-
-    <link rel="preload" href="globals/assets/icons/searchmarket.png" as="image">
-
-    <!-- DNS prefetch for external resources -->
     <link rel="dns-prefetch" href="//esi.evetech.net">
-
-    <!-- Favicon -->
-    <link rel="icon" href="globals/assets/icons/searchmarket.png" type=" image/png">
-
-    <!-- Main stylesheet -->
-    <link rel="stylesheet" href="globals/css/styles.css">
-
 </head>
 
 <body>
-    <div id="navContainer"></div>
-    <script src="./globals/js/loadGlobalNav.js" defer></script>
-
     <!-- Main content -->
     <main id="main-content" class="content" role="main">
         <p>
@@ -54,21 +39,14 @@
         </div>
     </main>
 
+    <div id="layoutContainer"></div>
+    <script src="/globals/js/loadGlobalNav.js" defer></script>
+    <script src="/EVE-Data-Hub/globals/js/cookieConsent.js" defer></script>
     <!-- Prefetch next likely pages -->
     <link rel="prefetch" href="market-search.html">
     <link rel="prefetch" href="market/data/marketMenu.json">
     <link rel="prefetch" href="market/data/locations.json">
     <link rel="prefetch" href="market/data/stations.json">
-
-    <script src="/EVE-Data-Hub/globals/js/cookieConsent.js" defer></script>
-
-    <div id="cookieConsent" class="cookie-banner">
-        <p>We use cookies to improve your experience. By using this site, you accept our use of cookies. <a
-                href="/privacy.html">Learn more</a></p>
-        <button id="acceptCookies">Accept</button>
-    </div>
 </body>
-
-<div id="layoutContainer"></div>
 
 </html>
