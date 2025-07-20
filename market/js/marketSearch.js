@@ -78,7 +78,7 @@ function renderSearchResults(query) {
         results.firstChild.classList.add('active');
     }
 
-    results.classList.add('visible');
+    results.classList.add('.hidden');
     appState.isSearchActive = true;
 }
 
@@ -122,7 +122,7 @@ function onItemSelected(typeID) {
 // 🧹 Hide Results
 function hideSearchResults() {
     elements.searchResults.innerHTML = '';
-    elements.searchResults.classList.remove('visible');
+    elements.searchResults.classList.remove('.hidden');
     appState.isSearchActive = false;
 }
 

@@ -8,7 +8,7 @@ import { renderScopedHistoryChart } from './historyChart_Slider.js';
 
 // 🌎 Initialize Region Dropdown
 export function initializeDropdowns() {
-    const regionNames = Object.keys(appState.locations).sort();
+    const regionNames = Object.keys(appState.regions).sort();
 
     elements.regionSelector.innerHTML = '<option value="all">All Regions</option>';
     regionNames.forEach(regionName => {
@@ -24,7 +24,7 @@ export async function handleRegionChange() {
     const selectedRegionName = elements.regionSelector.value;
 
     // 💾 Update region in state
-    const selectedRegionData = appState.locations[selectedRegionName];
+    const selectedRegionData = appState.regions[selectedRegionName];
     const selectedRegionID =
         selectedRegionData?.regionID || APP_CONFIG.DEFAULT_REGION_ID;
 
@@ -48,7 +48,7 @@ function disableAndReset(selectElement, placeholder) {
 
 // 🔍 Region ID Lookup by Name
 export function getRegionIDByName(name) {
-    return appState.locations?.[name]?.regionID ?? null;
+    return appState.regions?.[name]?.regionID ?? null;
     // 👈 fallback removed
-    // return appState.locations?.[name]?.regionID || APP_CONFIG.DEFAULT_REGION_ID; // 🗃️ legacy fallback commented out
+    // return appState.regions?.[name]?.regionID || APP_CONFIG.DEFAULT_REGION_ID; // 🗃️ legacy fallback commented out
 }

@@ -5,17 +5,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Market Search – EVE Data Hub</title>
-    <link rel="stylesheet" href="/globals/css/styles.css">
+    <link rel="stylesheet" href="./globals/css/styles.css">
     <link rel="stylesheet" href="market/css/marketTicker.css" />
-    <link rel="stylesheet" href="market/css/marketLeft.css" />
-    <link rel="stylesheet" href="market/css/marketRight.css" />
+    <link rel="stylesheet" href="market/css/marketSidebar.css" />
+    <link rel="stylesheet" href="market/css/itemViewer.css" />
+    <link rel="stylesheet" href="market/css/marketTables.css" />
+    <link rel="stylesheet" href="market/css/marketHistory.css" />
+    <link rel="icon" type="image/png" href="globals/assets/icons/favicon.png" />
 </head>
 
 <body>
     <main class="content">
         <div class="market-layout">
             <!-- 🧭 Sidebar -->
-            <aside id="itemselector">
+            <aside id="sidebar">
                 <div id="sidebarHeader">
                     <select id="regionSelector"></select>
                     <div id="searchWrapper">
@@ -43,19 +46,27 @@
 
                 <!-- 📊 Item Header & View Toggle -->
                 <div id="itemViewerHeader" class="item-viewer-header hidden">
-                    <img id="itemIcon" src="globals/assets/icons/searchmarket.png" alt="Item Icon" class="item-icon" />
-                    <div class="item-info">
-                        <div id="itemBreadcrumb" class="item-breadcrumb">Category / Subcategory</div>
-                        <div id="itemName" class="item-name">Item Name</div>
-                    </div>
+                    <!-- ⬅️ Left: Item Icon -->
+                    <div class="viewer-icon-container"></div>
 
-                    <div class="view-toggle">
-                        <button id="viewMarketBtn" class="view-tab active">Market Orders</button>
-                        <button id="viewHistoryBtn" class="view-tab">Price History</button>
-                    </div>
+                    <!-- ➡️ Right: Content -->
+                    <div class="viewer-header-right">
+                        <div id="itemViewerContainer" class="item-viewer-container">
+                            <div id="itemBreadcrumb" class="item-breadcrumb"></div>
+                            <div id="itemName" class="item-name"></div>
+                        </div>
 
-                    <button id="tabMarket" class="sidebar-tab active">+ Add to Quickbar</button>
+                        <!-- 🔘 Quickbar Button -->
+                        <button id="tabMarket" class="quickbar-action">+ Add to Quickbar</button>
+
+                        <!-- 🔗 Market Links -->
+                        <div class="market-links">
+                            <a id="viewMarketLink" href="#" class="market-link">Market Orders</a>
+                            <a id="viewHistoryLink" href="#" class="market-link">Price History</a>
+                        </div>
+                    </div>
                 </div>
+
 
                 <!-- 📊 Live Price Tables -->
                 <section id="itemPriceTables" class="item-view">
@@ -122,8 +133,9 @@
                 </section>
 
                 <!-- 📈 Price History Section -->
-                <section id="itemHistorySection" class="item-view market-history hidden">
-                    <h2 class="market-title">30-Day Price History</h2>
+                <section id="itemHistorySection" class="item-view market-history">
+                    <h2 class="market-title">365 Day Price History</h2>
+                    <p>Use the slider to change ranges or move along the timeline.</p>
                     <div class="history-chart-wrapper">
                         <div class="chart-container">
                             <canvas id="historyChart"></canvas>

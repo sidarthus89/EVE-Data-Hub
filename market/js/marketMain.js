@@ -4,7 +4,7 @@ import { handleItemSelection } from './itemDispatcher.js';
 import { cacheElements } from './marketUtilities.js';
 
 // 🧱 Initial Loaders
-import { loadLocations, loadStations, loadMarketMenu } from './marketDataFetcher.js';
+import { loadRegions, loadStations, loadMarketMenu } from './marketDataFetcher.js';
 import { loadTickerData } from './marketTicker.js';
 import { fetchMarketOrders } from './marketTables.js';
 
@@ -16,9 +16,7 @@ import { initializeSearch } from './marketSearch.js';
 import { setHistoryViewActive, fetchMarketHistory } from './itemPriceHistory.js';
 import {
     renderScopedHistoryChart,
-    setupSliderChartSync,
-    renderNavigatorChart,
-    initializeDualRangeSlider
+    renderNavigatorChart
 } from './historyChart_Slider.js';
 
 // 🌍 Global Location Logic
@@ -30,13 +28,21 @@ window.APP_CONFIG = APP_CONFIG;
 window.handleItemSelection = handleItemSelection;
 
 document.addEventListener('DOMContentLoaded', async () => {
+    appState.activeView = 'market';
+    console.log('[Main Init] View:', appState.activeView);
+    console.log('[DOM Cache]', {
+        tables: elements.marketTables,
+        history: elements.historyChart
+    });
+
+
     try {
         // 🌎 Cache DOM Elements
         cacheElements();
 
         // 🌐 Load Region & Market Data
         await Promise.all([
-            loadLocations(),
+            loadRegions(),
             loadStations(),
             loadMarketMenu()
         ]);
@@ -53,41 +59,62 @@ document.addEventListener('DOMContentLoaded', async () => {
         setupEventListeners();
         initializeSearch();
 
-        // 🔧 Initialize Dual Range Slider
-        const chartSlider = initializeDualRangeSlider({
-            min: 0,
-            max: 365,
-            leftValue: 0,
-            rightValue: 30,
-            onChange: (values) => {
-                window.chartSlider = chartSlider;
-                console.log('Slider changed:', values);
-                if (appState.selectedTypeID) {
-                    renderScopedHistoryChart(appState.selectedTypeID);
-                }
-            }
-        });
-        window.chartSlider = chartSlider;
 
         // 📈 Initial Ticker Load
         await loadTickerData();
 
         // 🖱️ History/Market Tab Switching
-        elements.viewMarketBtn?.addEventListener('click', () => {
-            setHistoryViewActive(false);
+        elements.viewMarketLink.addEventListener('click', e => {
+            e.preventDefault();
+
+            const regionID = RegionSelector.getRegionID() ?? APP_CONFIG.DEFAULT_REGION_ID;
+            const itemID = appState.selectedTypeID;
+
+            setHistoryViewActive(false, regionID, itemID);
         });
 
-        elements.viewHistoryBtn?.addEventListener('click', async () => {
-            setHistoryViewActive(true);
-            const typeID = appState.selectedTypeID;
-            const regionName = RegionSelector.getLocationSummary().region || 'all';
-            if (typeID) {
-                await fetchMarketHistory(typeID, regionName);
-                renderNavigatorChart(typeID);
-                renderScopedHistoryChart(typeID);
-                setupSliderChartSync(typeID);
+
+        elements.viewHistoryLink.addEventListener('click', async e => {
+            e.preventDefault();
+            console.log('[📌 Click] View History link clicked');
+
+            const regionID = RegionSelector.getRegionID() ?? APP_CONFIG.DEFAULT_REGION_ID;
+            const itemID = appState.selectedTypeID;
+
+            console.log('[🧭 IDs]', { regionID, itemID });
+
+            if (!regionID || !itemID) {
+                console.warn('❌ Cannot activate history view: missing regionID or itemID.');
+                return;
+            }
+
+            // ✅ Activate history view in state
+            setHistoryViewActive(true, regionID, itemID);
+
+            // ✅ Toggle chart/table visibility
+            elements.marketTables?.classList.remove('.hidden');
+            elements.historyChart?.classList.add('.hidden');
+
+            try {
+                console.log('[📡 Fetching] Requesting price history...');
+                await fetchMarketHistory(itemID, regionID);
+                console.log('[📦 Data] Market history loaded:', appState.marketHistory?.[itemID]);
+
+                appState.selectedTypeID = itemID;
+
+                // ✅ Defer chart render slightly for smoother transition
+                setTimeout(() => {
+                    console.log('[📊 Rendering] Starting chart render...');
+                    renderNavigatorChart(itemID);
+                    renderScopedHistoryChart(regionID, itemID);
+                }, 200);
+            } catch (err) {
+                console.warn(`❌ History render failed for ${itemID} in region ${regionID}:`, err);
             }
         });
+
+
+
 
     } catch (err) {
         console.error('Initialization failed:', err);
@@ -114,10 +141,10 @@ function extractItemList(menu) {
     }));
 }
 
-// 🔁 Reactive Order Fetcher
+// Order Fetcher/Refresh
 function refreshOrders() {
     const typeID = appState.selectedTypeID;
-    const regionName = RegionSelector.getLocationSummary().region || 'all';
+    const regionName = RegionSelector.getRegionSummary().region || 'all';
     if (typeID) {
         fetchMarketOrders(typeID, regionName);
     }

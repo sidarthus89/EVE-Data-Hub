@@ -3,10 +3,10 @@
 
 export const APP_CONFIG = {
     DATA_PATH: "./market/data/",
-    LOCATIONS_FILE: "locations.json",
+    REGIONS_FILE: "regions.json",
     STATIONS_FILE: "stations.json",
     MARKET_MENU_FILE: "marketMenu.json",
-    FALLBACK_ICON: "globals/assets/icons/searchmarket.png",
+    FALLBACK_ICON: "globals/assets/icons/favicon.png",
     ICON_BASE_URL: "market/icons/type/",
     ESI_BASE_URL: "https://esi.evetech.net/latest/markets/",
     DEFAULT_REGION_ID: 10000002,
@@ -14,7 +14,7 @@ export const APP_CONFIG = {
 };
 
 export const appState = {
-    locations: {},
+    regions: {},
     stations: {},
     marketMenu: {},
     flatItemList: [],

@@ -10,7 +10,7 @@ export async function fetchAndSet(filename, targetKey) {
     appState[targetKey] = await response.json();
 }
 
-export const loadLocations = () => fetchAndSet(APP_CONFIG.LOCATIONS_FILE, 'locations');
+export const loadRegions = () => fetchAndSet(APP_CONFIG.REGIONS_FILE, 'regions');
 export const loadStations = () => fetchAndSet(APP_CONFIG.STATIONS_FILE, 'stations');
 export const loadMarketMenu = () => fetchAndSet(APP_CONFIG.MARKET_MENU_FILE, 'marketMenu');
 
@@ -37,7 +37,7 @@ export async function fetchRegionOrders(typeID, regionID) {
 
 // 🌐 ESI: Aggregate Orders Across All Regions
 export async function fetchAllRegionOrders(typeID) {
-    const regionList = Object.values(appState.locations);
+    const regionList = Object.values(appState.regions);
     const results = await Promise.all(
         regionList.map(region => fetchRegionOrders(typeID, region.regionID))
     );

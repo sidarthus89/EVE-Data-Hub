@@ -4,30 +4,34 @@ let chartInstance = null;
 let debounceTimer;
 
 // 📈 Fetch 365-day price history for a single item
+
 export async function fetchMarketHistory(typeID, selectedRegion) {
-    const regionID =
-        !isNaN(selectedRegion)
-            ? Number(selectedRegion)
-            : appState.locations?.regions?.find(r => r.regionName === selectedRegion)?.regionID ??
-            APP_CONFIG.DEFAULT_REGION_ID;
+    // 1) Resolve regionID
+    let regionID = APP_CONFIG.DEFAULT_REGION_ID;
 
+    regionID = Number(selectedRegion) || APP_CONFIG.DEFAULT_REGION_ID;
+
+
+
+    // 2) Build and fire the URL
     const url = `${APP_CONFIG.ESI_BASE_URL}${regionID}/history/?type_id=${typeID}`;
-
     try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Failed to fetch history (HTTP ${response.status})`);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        if (!Array.isArray(json)) throw new Error(`Bad format for ${typeID}`);
 
-        const data = await response.json();
-        if (!Array.isArray(data)) throw new Error(`Invalid history format for ${typeID}`);
-
+        // 3) Keep the last 365 records
         appState.marketHistory = appState.marketHistory || {};
-        appState.marketHistory[typeID] = data.slice(-365);
-    } catch (err) {
-        console.error(`Failed history for ${typeID}:`, err);
+        appState.marketHistory[typeID] = json.slice(-365);
+    }
+    catch (err) {
+        console.error(`History fetch failed for ${typeID}:`, err);
         appState.marketHistory = appState.marketHistory || {};
         appState.marketHistory[typeID] = [];
     }
 }
+
 
 // 🧠 Compute Moving Average
 function computeMovingAverage(data, key, period) {
@@ -49,9 +53,47 @@ export function setHistoryViewActive(isActive) {
     const historyPanel = document.getElementById('itemHistorySection');
     const marketPanel = document.getElementById('itemPriceTables');
 
-    historyPanel?.classList.toggle('visible', isActive);
-    marketPanel?.classList.toggle('visible', !isActive);
+    if (isActive) {
+        historyPanel?.classList.remove('hidden');
+        historyPanel?.classList.add('.hidden');
 
-    document.getElementById('viewMarketBtn')?.classList.toggle('active', !isActive);
-    document.getElementById('viewHistoryBtn')?.classList.toggle('active', isActive);
+        marketPanel?.classList.add('hidden');
+        marketPanel?.classList.remove('.hidden');
+    } else {
+        marketPanel?.classList.remove('hidden');
+        marketPanel?.classList.add('.hidden');
+
+        historyPanel?.classList.add('hidden');
+        historyPanel?.classList.remove('.hidden');
+    }
+
+    document.getElementById('viewMarketLink')?.classList.toggle('active', !isActive);
+    document.getElementById('viewHistoryLink')?.classList.toggle('active', isActive);
 }
+
+export function drawHistoryChart(typeID = appState.selectedItemId) {
+
+    console.log('[Chart Triggered]', typeID);
+
+    const chartContainer = document.querySelector('.market-history');
+    const marketTables = document.querySelector('.market-tables');
+
+    // Toggle views
+    marketTables?.classList.remove('.hidden');
+    chartContainer?.classList.add('.hidden');
+
+    if (!typeID || typeof typeID !== 'number') {
+        chartContainer.innerHTML = '<p>No item selected.</p>';
+        return;
+    }
+
+    const priceData = appState.priceHistory?.[typeID];
+    if (!priceData || priceData.length === 0) {
+        chartContainer.innerHTML = '<p>No price history available for this item.</p>';
+    } else {
+        renderChart(chartContainer, priceData); // Your existing draw logic
+    }
+}
+
+
+

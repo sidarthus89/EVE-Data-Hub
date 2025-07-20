@@ -2,7 +2,7 @@
 // Renders buy/sell tables, sorting, pagination, and resizing
 
 import { APP_CONFIG, appState } from './marketConfig.js';
-import { updateItemHeader } from './itemViewer.js';
+import { updateItemDetails } from './itemViewer.js';
 import { formatISK, formatExpires } from './marketUtilities.js';
 import { fetchRegionOrders, fetchAllRegionOrders } from './marketDataFetcher.js';
 
@@ -28,7 +28,7 @@ export async function fetchMarketOrders(typeID, regionName = 'all') {
 
     const regionID = regionName === 'all'
         ? APP_CONFIG.DEFAULT_REGION_ID
-        : appState.locations?.[regionName]?.regionID ?? APP_CONFIG.DEFAULT_REGION_ID;
+        : appState.regions?.[regionName]?.regionID ?? APP_CONFIG.DEFAULT_REGION_ID;
 
     try {
         const orders = regionName === 'all'
@@ -60,6 +60,9 @@ function clearTables() {
 
 // 📋 Table Builder Wrapper
 function renderOrderTables(typeID, sellOrders, buyOrders) {
+
+    console.log('[Tables Render]', { typeID, sellOrders: sellOrders.length, buyOrders: buyOrders.length });
+
     const sellersTableBody = document.querySelector('#sellersTable tbody');
     const buyersTableBody = document.querySelector('#buyersTable tbody');
     const sellersCountEl = document.getElementById('sellersCount');
@@ -86,8 +89,8 @@ function renderOrderTables(typeID, sellOrders, buyOrders) {
     setupTableSort('buyersTable', false, 1);
 
     updateItemHeader(typeID);
-    const section = document.getElementById('itemPriceTables');
-    if (section) section.classList.add('visible');
+    const section = document.querySelector('.market-tables');
+    if (section) section.classList.add('.hidden');
 }
 
 // 📊 Table Renderer

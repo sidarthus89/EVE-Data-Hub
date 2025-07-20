@@ -11,12 +11,18 @@ import { renderScopedHistoryChart } from "./historyChart_Slider.js";
 
 // 🚀 Main initializer: full context load for item + location
 export async function loadItemContext(typeID, regionName = "all") {
+
+    console.log('[Persistence] Loaded type:', typeID, 'Region:', regionName);
+    console.log('[Persistence] View:', appState.activeView);
+
     if (!typeID || isNaN(typeID)) return;
     if (!regionName) regionName = "all";
 
     // 💾 Update location and UI selectors
     elements.regionSelector.value = regionName;
     elements.regionSelector.dispatchEvent(new Event("change"));
+    elements.marketTables?.classList.remove('.hidden');
+    elements.historyChart?.classList.add('.hidden');
 
     RegionSelector.setRegion(regionName);
     appState.selectedTypeID = typeID;
@@ -33,11 +39,20 @@ export async function loadItemContext(typeID, regionName = "all") {
     try {
         await fetchMarketOrders(typeID, regionID);
         await fetchMarketHistory(typeID, regionID);
-        renderScopedHistoryChart(typeID);
+        appState.selectedTypeID = typeID;
+
+        renderScopedHistoryChart(regionID, typeID);
+
+        // 🧭 DOM view update
+        elements.marketTables?.classList.remove('.hidden');
+        elements.historyChart?.classList.add('.hidden');
+
     } catch (err) {
         console.warn("Failed to load item context:", err);
     }
+    console.warn("Failed to load item context:", err);
 }
+
 
 // 👁️ Region Selector Visibility Toggles
 export function hideRegionSelectors(hide = true) {

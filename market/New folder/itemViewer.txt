@@ -1,0 +1,90 @@
+/* ─── Item Viewer Layout ─────── */
+.item-viewer-header {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 10px 0;
+}
+
+.viewer-header-left {
+    flex-shrink: 0;
+}
+
+.viewer-header-right {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-grow: 1;
+}
+
+.item-viewer-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.item-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ddd;
+}
+
+/* ─── Breadcrumb Trail ─────── */
+.item-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 13px;
+    color: #aaa;
+}
+
+.item-breadcrumb a,
+.breadcrumb-link {
+    color: #ccc;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.item-breadcrumb a:hover,
+.breadcrumb-link:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+/* ─── Quickbar & View Links ─────── */
+#tabMarket {
+    padding: 6px 12px;
+    background-color: #222;
+    color: #ddd;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    width: fit-content;
+    margin-bottom: 4px;
+}
+
+#tabMarket:hover {
+    background-color: #444;
+    color: #fff;
+}
+
+.market-links {
+    display: flex;
+    gap: 16px;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.market-links a {
+    color: #ccc;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.market-links a:hover {
+    color: #fff;
+    text-decoration: underline;
+}

@@ -1,5 +1,5 @@
 import { appState, APP_CONFIG, elements } from '../../market/js/marketConfig.js';
-import { fetchMarketOrders } from '../../market/js/marketTables.js'; // Adjust path if needed
+import { fetchMarketOrders } from '../../market/js/marketTables.js';
 
 const listeners = [];
 
@@ -11,22 +11,24 @@ export const RegionSelector = {
 
     // 🌐 Region data access
     getRegionList() {
-        return appState.locations || {};
+        return appState.regions || {};
     },
 
     getRegionID() {
         return appState.selectedRegionID ?? null;
     },
 
-    getLocationSummary() {
+    // 🔍 Updated to include both name & ID
+    getRegionSummary() {
         return {
-            region: appState.selectedRegionName
+            region: appState.selectedRegionName,
+            regionID: appState.selectedRegionID ?? null
         };
     },
 
     // 🚀 Region selection
     setRegion(regionName) {
-        const regionData = appState.locations?.[regionName];
+        const regionData = appState.regions?.[regionName];
         appState.selectedRegionName = regionName;
         appState.selectedRegionID = regionData?.regionID || APP_CONFIG.DEFAULT_REGION_ID;
 
@@ -46,10 +48,10 @@ export const RegionSelector = {
             elements.regionSelector.appendChild(option);
         });
 
-        // 🔄 Restore from saved region (if exists)
+        // 🔄 Restore from saved region
         const storedRegionID = Number(localStorage.getItem('selectedRegion'));
         if (!isNaN(storedRegionID)) {
-            const storedRegionName = Object.entries(appState.locations || {}).find(
+            const storedRegionName = Object.entries(appState.regions || {}).find(
                 ([_, value]) => value.regionID === storedRegionID
             )?.[0];
 
@@ -59,16 +61,15 @@ export const RegionSelector = {
             }
         }
 
-        // 🖱️ Attach change listener
+        // 🖱️ Change listener
         elements.regionSelector.addEventListener('change', () => {
             const selected = elements.regionSelector.value;
             RegionSelector.setRegion(selected);
         });
 
-        // 📡 Reactively refresh market view
-        RegionSelector.onLocationChange(({ region }) => {
+        // 📡 Reactive refresh
+        RegionSelector.onLocationChange(({ regionID }) => {
             const typeID = window.appState?.selectedTypeID;
-            const regionID = RegionSelector.getRegionID();
 
             if (typeID && regionID) {
                 fetchMarketOrders(typeID, regionID);
@@ -79,6 +80,6 @@ export const RegionSelector = {
 
 // 🔊 Notify subscribers
 function emitChange() {
-    const summary = RegionSelector.getLocationSummary();
+    const summary = RegionSelector.getRegionSummary();
     listeners.forEach(cb => cb(summary));
 }

@@ -2,6 +2,8 @@ import { appState } from './marketConfig.js';
 
 let chartInstance = null;
 let debounceTimer = null;
+let navigatorChartInstance = null;
+
 
 // 🔢 Compute Moving Average
 function computeMovingAverage(data, key, period) {
@@ -11,17 +13,10 @@ function computeMovingAverage(data, key, period) {
   });
 }
 
-// 🧠 Slice Data Based on Slider Range
-function getScopedHistory(typeID) {
-  const fullHistory = appState.marketHistory?.[typeID] || [];
-  const { leftValue, rightValue } = window.chartSlider?.getValues?.() || { leftValue: 0, rightValue: 30 };
-  const start = Math.max(365 - rightValue, 0);
-  const end = Math.min(365 - leftValue, fullHistory.length);
-  return fullHistory.slice(start, end);
-}
-
 // 📊 Render Price History Chart
-export function renderScopedHistoryChart(typeID) {
+export function renderScopedHistoryChart(regionID, typeID) {
+  console.log("[chart] Drawing history chart for:", { regionID, typeID });
+
   const fullHistory = appState.marketHistory?.[typeID];
   if (!fullHistory?.length) {
     console.warn('No history data found for:', typeID);
@@ -124,9 +119,12 @@ export function renderScopedHistoryChart(typeID) {
         legend: { labels: { color: '#ccc' } },
         tooltip: { mode: 'index', intersect: false },
         zoom: {
-          pan: { enabled: true, mode: 'x' },
-          zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'y', overScaleMode: 'y' }
+          wheel: { enabled: true },
+          pinch: { enabled: true },
+          mode: 'y',
+          scaleMode: 'y'
         }
+
       }
     }
   });
@@ -142,13 +140,22 @@ export function renderNavigatorChart(typeID) {
   const fullHistory = appState.marketHistory?.[typeID];
   if (!fullHistory?.length) return;
 
-  const ctx = document.getElementById('navigatorChart')?.getContext('2d');
-  if (!ctx) return;
+  const canvas = document.getElementById('navigatorChart');
+  const ctx = canvas?.getContext('2d');
+  if (!canvas || !ctx) return;
 
-  const labels = fullHistory.map(h => new Date(h.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+  // 🧼 Destroy previous chart instance
+  if (navigatorChartInstance) {
+    navigatorChartInstance.destroy();
+    navigatorChartInstance = null;
+  }
+
+  const labels = fullHistory.map(h =>
+    new Date(h.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  );
   const prices = fullHistory.map(h => h.average);
 
-  new Chart(ctx, {
+  navigatorChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
       labels,
@@ -178,79 +185,36 @@ export function renderNavigatorChart(typeID) {
   });
 }
 
-// 🛠️ Initialize Slider & Sync Chart
-export function initializeDualRangeSlider({ min, max, leftValue, rightValue }) {
-  const leftHandle = document.getElementById('leftHandle');
-  const rightHandle = document.getElementById('rightHandle');
-  const selection = document.getElementById('selection');
-  const track = document.querySelector('.dual-range-container');
+export function makeScopeOverlayDraggable() {
+  const overlay = document.getElementById('scopeOverlay');
+  const wrapper = document.getElementById('navigatorWrapper');
+  if (!overlay || !wrapper) return;
 
-  const slider = {
-    min,
-    max,
-    leftValue,
-    rightValue,
-    getValues() {
-      return { leftValue: this.leftValue, rightValue: this.rightValue };
-    },
-    setValues({ leftValue, rightValue }) {
-      this.leftValue = Math.max(min, Math.min(rightValue, leftValue));
-      this.rightValue = Math.min(max, Math.max(leftValue, rightValue));
-      updatePositions();
+  let startX = 0;
+  let startLeft = 0;
+  let dragging = false;
+
+  overlay.addEventListener('mousedown', e => {
+    dragging = true;
+    startX = e.clientX;
+    startLeft = overlay.offsetLeft;
+
+    const wrapperRect = wrapper.getBoundingClientRect();
+
+    function onMove(e) {
+      if (!dragging) return;
+      const deltaX = e.clientX - startX;
+      const newLeft = Math.max(0, Math.min(startLeft + deltaX, wrapperRect.width - overlay.offsetWidth));
+      overlay.style.left = `${(newLeft / wrapperRect.width) * 100}%`;
     }
-  };
 
-  function updatePositions() {
-    const range = max - min;
-    const leftPercent = ((slider.leftValue - min) / range) * 100;
-    const rightPercent = ((slider.rightValue - min) / range) * 100;
-    const width = rightPercent - leftPercent;
+    function onUp() {
+      dragging = false;
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    }
 
-    leftHandle.style.left = `${leftPercent}%`;
-    rightHandle.style.left = `${rightPercent}%`;
-    selection.style.left = `${leftPercent}%`;
-    selection.style.width = `${width}%`;
-  }
-
-  function attachDrag(handle, side) {
-    handle.addEventListener('mousedown', e => {
-      const startX = e.clientX;
-      const trackRect = track.getBoundingClientRect();
-      const range = max - min;
-
-      function onMove(e) {
-        const deltaX = e.clientX - startX;
-        const percent = (deltaX / trackRect.width) * 100;
-        const daysDelta = Math.round((percent * range) / 100);
-
-        if (side === 'left') {
-          slider.leftValue = Math.max(min, Math.min(slider.rightValue - 1, slider.leftValue + daysDelta));
-        } else {
-          slider.rightValue = Math.min(max, Math.max(slider.leftValue + 1, slider.rightValue + daysDelta));
-        }
-
-        updatePositions();
-        renderScopedHistoryChart(appState.selectedTypeID);
-      }
-
-      function onUp() {
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
-      }
-
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
-    });
-  }
-
-  attachDrag(leftHandle, 'left');
-  attachDrag(rightHandle, 'right');
-  updatePositions();
-  window.chartSlider = slider;
-  return slider;
-}
-
-// 🔁 Fallback Listener
-export function setupSliderChartSync(typeID) {
-  renderScopedHistoryChart(typeID);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
 }

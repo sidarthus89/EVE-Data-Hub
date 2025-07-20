@@ -21,7 +21,7 @@ export function initializeMarketLocationDropdowns() {
     // 🔄 Auto-select previously stored region if available
     const storedRegionID = Number(localStorage.getItem('selectedRegion'));
     if (!isNaN(storedRegionID)) {
-        const storedRegionName = Object.entries(appState.locations || {}).find(
+        const storedRegionName = Object.entries(appState.regions || {}).find(
             ([_, value]) => value.regionID === storedRegionID
         )?.[0];
 

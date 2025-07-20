@@ -1,18 +1,12 @@
-// 🌳 marketTree.js
-// Builds and renders the collapsible market category tree from menu data
-
 import { appState, elements } from './marketConfig.js';
-import { getGroupIcon } from './marketUtilities.js';
 import { handleItemSelection } from './itemDispatcher.js';
 import { addToQuickbar } from './marketQuickbar.js';
 
-// 🧠 Flatten all valid market items for global search
 export function buildFlatItemList(menuData) {
     appState.flatItemList = [];
 
     function scan(node) {
         if (!node) return;
-
         if (Array.isArray(node)) {
             node.forEach(scan);
         } else if (isValidItem(node)) {
@@ -38,7 +32,6 @@ export function buildFlatItemList(menuData) {
     scan(menuData);
 }
 
-// 🧱 Initialize tree and attach to DOM
 export function initializeMarketMenu() {
     const menuData = appState.marketMenu;
     elements.menuList.innerHTML = '';
@@ -50,40 +43,67 @@ export function initializeMarketMenu() {
     });
 }
 
-// 🌲 Render a top-level group wrapper
+export function getGroupIcon(groupID, groupNode) {
+    let iconFile = groupNode?._info?.iconFile;
+    if (!iconFile) {
+        function findIn(node) {
+            for (const [key, val] of Object.entries(node)) {
+                if (key === '_info' && val.marketGroupID == groupID) {
+                    return val.iconFile;
+                }
+                if (typeof val === 'object') {
+                    const nested = findIn(val);
+                    if (nested) return nested;
+                }
+            }
+        }
+        iconFile = findIn(appState.marketMenu);
+    }
+
+    return iconFile
+        ? `/market/icons/items/${iconFile}`
+        : '/market/icons/default.png';
+}
+
 export function renderGroup(groupName, groupObject, parentElement) {
+    const groupID = groupObject._info?.marketGroupID;
+    const iconSrc = getGroupIcon(groupID, groupObject);
+
     const groupLi = document.createElement('li');
     groupLi.className = 'collapsible';
     groupLi.setAttribute('aria-expanded', 'false');
+    groupLi.dataset.groupId = groupID;
 
     const headerDiv = document.createElement('div');
     headerDiv.className = 'group-label-wrapper';
 
-    const arrowSpan = document.createElement('span');
-    arrowSpan.className = 'group-arrow';
-    arrowSpan.textContent = '▶';
-    arrowSpan.style.marginRight = '6px';
-    arrowSpan.style.transition = 'transform 0.2s ease-in-out';
+    const arrow = document.createElement('span');
+    arrow.className = 'group-arrow';
+    arrow.textContent = '▶';
+    arrow.style.marginRight = '6px';
 
-    const iconImg = document.createElement('img');
-    iconImg.className = 'group-icon';
-    iconImg.src = getGroupIcon(groupObject);
+    const icon = document.createElement('img');
+    icon.className = 'group-icon';
+    icon.src = iconSrc;
+    // ← Set fixed size for group icons
+    icon.style.width = '16px';
+    icon.style.height = '16px';
+    icon.onerror = () => (icon.src = '/market/icons/default.png');
 
-    const labelSpan = document.createElement('span');
-    labelSpan.className = 'group-label';
-    labelSpan.textContent = groupName;
+    const label = document.createElement('span');
+    label.className = 'group-label';
+    label.textContent = groupName;
 
-    headerDiv.append(arrowSpan, iconImg, labelSpan);
+    headerDiv.append(arrow, icon, label);
     groupLi.appendChild(headerDiv);
     parentElement.appendChild(groupLi);
 
     let subList = null;
-
-    headerDiv.addEventListener('click', e => {
+    headerDiv.addEventListener('click', (e) => {
         e.stopPropagation();
         const expanded = groupLi.classList.toggle('expanded');
         groupLi.setAttribute('aria-expanded', expanded);
-        arrowSpan.style.transform = expanded ? 'rotate(90deg)' : 'rotate(0deg)';
+        arrow.style.transform = expanded ? 'rotate(90deg)' : 'rotate(0deg)';
 
         if (!subList) {
             subList = createSubMenu(groupObject);
@@ -94,7 +114,6 @@ export function renderGroup(groupName, groupObject, parentElement) {
     });
 }
 
-// 🍃 Render subgroup or item entries inside collapsible menu
 export function createSubMenu(groupObject) {
     const subList = document.createElement('ul');
     subList.className = 'subcategories show';
@@ -103,30 +122,9 @@ export function createSubMenu(groupObject) {
         if (key === '_info') return;
 
         if (Array.isArray(value)) {
-            value.forEach(item => {
-                const itemLi = document.createElement('li');
-                itemLi.className = 'market-item';
-                itemLi.dataset.typeId = item.typeID;
-
-                const label = document.createElement('span');
-                label.textContent = item.typeName?.trim();
-
-                const addBtn = document.createElement('button');
-                addBtn.textContent = '+';
-                addBtn.title = 'Add to Quickbar';
-                addBtn.className = 'quickbar-btn';
-                addBtn.addEventListener('click', e => {
-                    e.stopPropagation();
-                    addToQuickbar(item); // You can pass typeID or full item object
-                });
-
-                itemLi.append(label, addBtn);
-
-                itemLi.addEventListener('click', () => {
-                    if (item.typeID) handleItemSelection(item.typeID);
-                });
-
-                subList.appendChild(itemLi);
+            value.forEach((item) => {
+                const itemEl = createMarketItem(item);
+                subList.appendChild(itemEl);
             });
         } else if (typeof value === 'object') {
             renderGroup(key, value, subList);
@@ -134,4 +132,70 @@ export function createSubMenu(groupObject) {
     });
 
     return subList;
+}
+
+function createMarketItem(item) {
+    const li = document.createElement('li');
+    li.className = 'market-item';
+    li.dataset.typeId = item.typeID;
+
+    const icon = document.createElement('img');
+    icon.className = 'item-icon';
+    icon.src = `/market/icons/types/${item.typeID}.png`;
+    icon.alt = item.typeName;
+    // ← Set fixed size for item icons
+    icon.style.width = '16px';
+    icon.style.height = '16px';
+
+    const label = document.createElement('span');
+    label.textContent = item.typeName?.trim();
+
+    const addBtn = document.createElement('button');
+    addBtn.textContent = '+';
+    addBtn.title = 'Add to Quickbar';
+    addBtn.className = 'quickbar-btn';
+    addBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        addToQuickbar(item);
+    });
+
+    li.append(icon, label, addBtn);
+    li.addEventListener('click', () => {
+        handleItemSelection(item.typeID);
+    });
+
+    return li;
+}
+
+export function expandMarketPath(segmentChain = []) {
+    if (!segmentChain.length) return;
+
+    document.querySelectorAll('li.collapsible.expanded').forEach((li) => {
+        li.classList.remove('expanded');
+        li.setAttribute('aria-expanded', 'false');
+        const arrow = li.querySelector('.group-arrow');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        const subList = li.querySelector('.subcategories');
+        if (subList) subList.classList.remove('show');
+    });
+
+    let currentList = elements.menuList;
+    for (const segment of segmentChain) {
+        const match = [...currentList.querySelectorAll('.group-label-wrapper')].find(
+            (wrapper) =>
+                wrapper.querySelector('.group-label')?.textContent.trim() === segment
+        );
+        if (match) {
+            const groupLi = match.closest('li.collapsible');
+            groupLi.classList.add('expanded');
+            groupLi.setAttribute('aria-expanded', 'true');
+            const arrow = groupLi.querySelector('.group-arrow');
+            if (arrow) arrow.style.transform = 'rotate(90deg)';
+            let subList = groupLi.querySelector('.subcategories');
+            subList.classList.add('show');
+            subList.style.display = 'block';
+            groupLi.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            currentList = subList;
+        }
+    }
 }

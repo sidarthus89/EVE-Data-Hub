@@ -67,26 +67,22 @@ nav.global-nav {
 
 }
 
-.global-nav .nav-left .active-nav {
-    background: none;
-    font-weight: normal;
-    padding: 0;
-    border: none;
-    border-radius: 0;
-}
-
 .global-nav .nav-left .active-nav:hover {
     background-color: #132b33;
     color: #fff;
     box-shadow: 0 0 8px rgba(8, 74, 98, 0.25);
 }
 
-.global-nav .nav-title {
-    border: none !important;
-    background: none;
-    padding: 10px 16px;
-    font-weight: normal;
-    box-shadow: none;
+.global-nav .nav-title::before {
+    position: absolute;
+    content: "";
+    display: block;
+    right: -2px;
+    bottom: -2px;
+    width: 0;
+    height: 0;
+    border-left: solid transparent 23px;
+    border-bottom: solid #234e5b 23px;
 }
 
 .global-nav .nav-links {
@@ -103,37 +99,16 @@ nav.global-nav {
     position: absolute;
     content: "";
     display: block;
-    left: -2px;
+    right: -2px;
     /* Adjust for border width */
     bottom: -2px;
     /* Adjust for border width */
     width: 0;
     height: 0;
-    border-right: solid transparent 23px;
+    border-left: solid transparent 23px;
     /* 20px notch + 2px border */
     border-bottom: solid #234e5b 23px;
     /* Your border color */
-}
-
-.global-nav a {
-    position: relative;
-    display: inline-block;
-    padding: 10px 16px;
-    font-family: 'evesansneue', monospace;
-    font-size: 0.95rem;
-    text-decoration: none;
-    color: #ccc;
-    background-color: #1f262b;
-    border: 2px solid #234e5b;
-    clip-path: polygon(0 0,
-            100% 0,
-            100% 100%,
-            20px 100%,
-            0 calc(100% - 20px));
-    transition: background 0.2s, box-shadow 0.2s, color 0.2s;
-    z-index: 1;
-    overflow: visible;
-    max-width: 100%;
 }
 
 .global-nav a:hover {
@@ -160,43 +135,22 @@ nav.global-nav {
     position: absolute;
     content: "";
     display: block;
-    left: -2px;
+    right: -2px;
     /* Adjust for border width */
     bottom: -2px;
     /* Adjust for border width */
     width: 0;
     height: 0;
-    border-right: solid transparent 23px;
+    border-left: solid transparent 23px;
     /* 20px notch + 2px border */
     border-bottom: solid #234e5b 23px;
     /* Your border color */
 }
 
-.nav-dropdown-label {
-    position: relative;
-    display: inline-block;
-    padding: 10px 16px;
-    font-family: 'evesansneue', monospace;
-    font-size: 0.95rem;
-    text-decoration: none;
-    color: #ccc;
-    background-color: #1f262b;
-    border: 2px solid #234e5b;
-    clip-path: polygon(0 0,
-            100% 0,
-            100% 100%,
-            20px 100%,
-            0 calc(100% - 20px));
-    transition: background 0.2s, box-shadow 0.2s, color 0.2s;
-    z-index: 1;
-    overflow: visible;
-    max-width: 100%;
-}
-
 .nav-dropdown-menu {
     display: none;
     position: absolute;
-    right: 0;
+    left: 0;
     background-color: transparent;
     min-width: 160px;
     z-index: 1001;
@@ -205,7 +159,7 @@ nav.global-nav {
 
 .nav-dropdown-menu a {
     display: block;
-    padding: 10px 16px;
+    padding: 10px 20px;
     color: #b4b4b4;
     text-decoration: none;
     white-space: nowrap;
@@ -221,13 +175,61 @@ nav.global-nav {
     display: block;
 }
 
-.global-nav .nav-title.active-nav {
-    background-color: transparent;
-    font-weight: normal;
-    padding: 10px;
-    border: none;
-    border-radius: 0;
+/* Apply the same base styling to nav-title, nav-dropdown-label, and link buttons */
+.global-nav .nav-title,
+.nav-dropdown-label,
+.global-nav a {
+    position: relative;
+    display: inline-block;
+    padding: 10px 20px;
+    font-family: 'evesansneue', monospace;
+    font-size: 0.95rem;
+    text-decoration: none;
+    color: #ccc;
+    background-color: #1f262b;
+    border: 2px solid #234e5b;
+    clip-path: polygon(0 0,
+            100% 0,
+            100% calc(100% - 20px),
+            calc(100% - 20px) 100%,
+            0 100%);
+    transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+    z-index: 1;
+    overflow: visible;
+    max-width: 100%;
 }
+
+.global-nav .nav-title::before,
+.nav-dropdown-label::before,
+.global-nav a::before {
+    position: absolute;
+    content: "";
+    display: block;
+    right: -2px;
+    bottom: -2px;
+    width: 0;
+    height: 0;
+    border-left: solid transparent 23px;
+    border-bottom: solid #234e5b 23px;
+}
+
+.global-nav .nav-title:hover,
+.nav-dropdown-label:hover,
+.global-nav a:hover {
+    background-color: #132b33;
+    color: #fff;
+    box-shadow: 0 0 8px rgba(8, 74, 98, 0.25);
+}
+
+.global-nav .nav-title.active-nav,
+.nav-dropdown-label.active-nav,
+.global-nav a.active-nav {
+    background-color: #0e83ae;
+    color: #000;
+    box-shadow: 0 0 12px rgba(8, 74, 98, 0.5);
+    border-color: #234e5b;
+}
+
 
 /* ─── Global Footer Bar ───────────────────────────────── */
 .global-footer {

@@ -28,7 +28,7 @@ export function renderQuickbar(show) {
         appState.quickbarItems = stored ? JSON.parse(stored) : [];
     }
 
-    const container = document.getElementById("itemselector");
+    const container = document.getElementById("sidebar");
     let quickbarEl = document.getElementById("quickbarList");
     let headerRow = document.getElementById("quickbarHeader");
 

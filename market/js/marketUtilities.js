@@ -10,8 +10,12 @@ export function getIconPath(typeID, size = 32, ext = 'png') {
 }
 
 export function getGroupIcon(groupObject) {
-    return APP_CONFIG.FALLBACK_ICON;
+    const groupID = groupObject?._info?.id;
+
+    // Point to your actual group icon path
+    return `/market/icons/types/${groupID}.png`;
 }
+
 
 // 💱 Formatters
 export function formatExpires(days) {
@@ -133,7 +137,7 @@ export function createSubMenu(groupObject) {
                 itemLi.className = 'market-item';
                 itemLi.dataset.typeId = item.typeID;
 
-                const icon = document.createElement('img'); // ✅ FIXED: icon wasn't declared
+                const icon = document.createElement('img');
                 icon.alt = item.typeName;
                 icon.className = 'submenu-icon';
                 icon.src = getIconPath(item.typeID);
@@ -157,6 +161,17 @@ export function createSubMenu(groupObject) {
     return subList;
 }
 
+export function syncViewDisplay() {
+    if (appState.activeView === 'market') {
+        elements.marketTables?.classList.remove('hidden');
+        elements.historyChart?.classList.add('hidden');
+    } else if (appState.activeView === 'history') {
+        elements.marketTables?.classList.add('hidden');
+        elements.historyChart?.classList.remove('hidden');
+    }
+}
+
+
 // 🧱 DOM Element Caching for Early Access
 export function cacheElements() {
     elements.searchBox = document.getElementById('searchBox');
@@ -166,6 +181,15 @@ export function cacheElements() {
     elements.itemName = document.getElementById('itemName');
     elements.itemBreadcrumb = document.getElementById('itemBreadcrumb');
     elements.regionSelector = document.getElementById('regionSelector');
-    elements.viewMarketBtn = document.getElementById('viewMarketBtn');
-    elements.viewHistoryBtn = document.getElementById('viewHistoryBtn');
+    elements.viewMarketLink = document.getElementById('viewMarketLink');
+    elements.viewHistoryLink = document.getElementById('viewHistoryLink');
+    elements.viewerContainer = document.getElementById('itemViewerContainer');
+    elements.viewerIconWrapper = document.querySelector('.viewer-icon-container');
+
+
+
+    console.log('[Element Cache]', {
+        tables: document.querySelector('.market-tables'),
+        history: document.querySelector('.market-history')
+    });
 }
