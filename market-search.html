@@ -22,11 +22,11 @@
                 <div id="sidebarHeader">
                     <select id="regionSelector"></select>
                     <div id="searchWrapper">
-                        <input type="text" id="searchBox" placeholder="Search items..." autocomplete="off" />
+                        <input type="text" id="searchBox" placeholder="Search items..." autocomplete="on" />
                         <ul id="searchResults" class="search-results"></ul>
                         <button id="clearSearch" style="display:none;">&times;</button>
                         <button id="collapseAllBtn" title="Collapse all groups">
-                            <img src="./assets/icons/collapse-icon.png" alt="Collapse" />
+                            <img src="./market/icons/collapse.png" alt="Collapse" />
                         </button>
                     </div>
 
@@ -39,37 +39,35 @@
 
                 <ul id="menuList" class="menuList menuListtop"></ul>
             </aside>
-
-
-            <!-- 📦 Item Viewer Container -->
-            <section class="itemViewer">
-
-                <!-- 📊 Item Header & View Toggle -->
-                <div id="itemViewerHeader" class="item-viewer-header hidden">
-                    <!-- ⬅️ Left: Item Icon -->
-                    <div class="viewer-icon-container"></div>
-
-                    <!-- ➡️ Right: Content -->
-                    <div class="viewer-header-right">
-                        <div id="itemViewerContainer" class="item-viewer-container">
-                            <div id="itemBreadcrumb" class="item-breadcrumb"></div>
-                            <div id="itemName" class="item-name"></div>
+            <div class="market-content">
+                <section class="itemViewer">
+                    <div id="itemViewerHeader" class="item-viewer-header hidden">
+                        <!-- ⬅️ Left: Item Icon -->
+                        <div class="viewer-icon-container">
+                            <img id="itemIcon" class="viewer-icon" alt="Item Icon" />
                         </div>
 
-                        <!-- 🔘 Quickbar Button -->
-                        <button id="tabMarket" class="quickbar-action">+ Add to Quickbar</button>
+                        <!-- ➡️ Right: Content -->
+                        <div class="viewer-header-right">
+                            <div id="itemViewerContainer" class="item-viewer-container">
+                                <div id="itemBreadcrumb" class="item-breadcrumb"></div>
+                                <div id="itemName" class="item-name"></div>
+                            </div>
 
-                        <!-- 🔗 Market Links -->
-                        <div class="market-links">
-                            <a id="viewMarketLink" href="#" class="market-link">Market Orders</a>
-                            <a id="viewHistoryLink" href="#" class="market-link">Price History</a>
+                            <!-- 🔘 Quickbar Button -->
+                            <button id="tabMarket" class="quickbar-action">+ Add to Quickbar</button>
+
+                            <!-- 🔗 Market Links -->
+                            <div class="market-tabs">
+                                <a id="viewMarketLink" href="#" class="market-tabs active">Market Orders</a>
+                                <a id="viewHistoryLink" href="#" class="market-tabs">Price History</a>
+                                <div class="tab-underline"></div>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-
+                </section>
                 <!-- 📊 Live Price Tables -->
-                <section id="itemPriceTables" class="item-view">
+                <section id="itemPriceTables" class="market-view">
                     <!-- Sellers Section -->
                     <div class="market-section">
                         <h2 class="market-title">
@@ -131,49 +129,46 @@
                         </div>
                     </div>
                 </section>
-
                 <!-- 📈 Price History Section -->
-                <section id="itemHistorySection" class="item-view market-history">
+                <section id="itemHistorySection" class="market-view hidden">
                     <h2 class="market-title">365 Day Price History</h2>
                     <p>Use the slider to change ranges or move along the timeline.</p>
                     <div class="history-chart-wrapper">
                         <div class="chart-container">
                             <canvas id="historyChart"></canvas>
-                        </div>
-                        <div id="navigatorWrapper">
-                            <canvas id="navigatorChart"></canvas>
-                            <div id="scopeOverlay"></div>
-                        </div>
-                        <div class="chart-range-slider">
-                            <span class="range-label">Range:</span>
-                            <div class="dual-range-container">
-                                <div class="dual-range-track"></div>
-                                <div class="dual-range-selection" id="selection"></div>
-                                <div class="dual-range-handle" id="leftHandle"></div>
-                                <div class="dual-range-handle" id="rightHandle"></div>
+                            <div class="chart-slider-wrapper">
+                                <canvas id="chartMiniMap"></canvas>
+
+                                <div id="chartSliderOverlay">
+                                    <div id="chartSlider" class="slider-range">
+                                        <div class="slider-counter">30d</div>
+                                        <div class="slider-handle left"></div>
+                                        <div class="slider-window"></div>
+                                        <div class="slider-handle right"></div>
+                                    </div>
+                                </div>
                             </div>
-                            <span class="range-label" id="rangeDisplay">80 days</span>
                         </div>
                     </div>
                 </section>
-            </section>
-        </div>
+            </div>
 
-        <div class="marquee" id="plexTicker">
-            <div class="marquee__content">
-                <!-- Filled dynamically -->
-                <div class="marquee__copies" aria-hidden="true"></div>
+            <div class="marquee" id="plexTicker">
+                <div class="marquee__content">
+                    <!-- Filled dynamically -->
+                    <div class="marquee__copies" aria-hidden="true"></div>
+                </div>
             </div>
         </div>
-
-
     </main>
     <div id="layoutContainer"></div>
     <script src="/globals/js/loadGlobalNav.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
     <script type="module" src="market/js/marketMain.js"></script>
-    <script src="/EVE-Data-Hub/globals/js/cookieConsent.js" defer></script>
+    <script type="module" src="/globals/js/regionSelector.js"></script>
+
+    <!-- <script src="/EVE-Data-Hub/globals/js/cookieConsent.js" defer></script> -->
 </body>
 
 </html>

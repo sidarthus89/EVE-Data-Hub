@@ -5,15 +5,18 @@ import { appState, elements, APP_CONFIG } from './marketConfig.js';
 import { handleItemSelection } from './itemDispatcher.js';
 
 // 🎨 Icon Path Generators
-export function getIconPath(typeID, size = 32, ext = 'png') {
-    return `${APP_CONFIG.ICON_BASE_URL}${typeID}_${size}.${ext}`;
+export function getIconPath(iconFile) {
+    return iconFile
+        ? `/${APP_CONFIG.ICON_BASE_URL}${iconFile}`
+        : APP_CONFIG.FALLBACK_ICON;
 }
 
-export function getGroupIcon(groupObject) {
-    const groupID = groupObject?._info?.id;
 
-    // Point to your actual group icon path
-    return `/market/icons/types/${groupID}.png`;
+export function getGroupIcon(groupObject) {
+    const iconFile = groupObject?._info?.iconFile;
+    return iconFile
+        ? `/${APP_CONFIG.GROUP_ICON_PATH}${iconFile}`
+        : APP_CONFIG.FALLBACK_ICON;
 }
 
 
@@ -69,7 +72,7 @@ export function buildFlatItemList(menuData) {
 
 // 🌲 Initialize Menu from Market Data
 export function initializeMarketMenu() {
-    const menuData = appState.marketMenu;
+    const menuData = appState.marke;
     elements.menuList.innerHTML = '';
     buildFlatItemList(menuData);
 
@@ -125,6 +128,7 @@ export function renderGroup(groupName, groupObject, parentElement) {
 
 // 📂 Create Nested Submenu for Market Items
 export function createSubMenu(groupObject) {
+    icon.src = getIconPath(item.iconFile);
     const subList = document.createElement('ul');
     subList.className = 'subcategories show';
 
@@ -163,14 +167,39 @@ export function createSubMenu(groupObject) {
 
 export function syncViewDisplay() {
     if (appState.activeView === 'market') {
-        elements.marketTables?.classList.remove('hidden');
-        elements.historyChart?.classList.add('hidden');
+        elements.marketTables?.classList.remove("hidden");
+        elements.historyChart?.classList.add("hidden");
     } else if (appState.activeView === 'history') {
-        elements.marketTables?.classList.add('hidden');
-        elements.historyChart?.classList.remove('hidden');
+        elements.marketTables?.classList.add("hidden");
+        elements.historyChart?.classList.remove("hidden");
     }
 }
 
+export function buildLocationMaps(locationsData) {
+    appState.stationMap = {};
+    appState.regionMap = {};
+
+    Object.entries(locationsData).forEach(([regionName, regionObj]) => {
+        const regionID = regionObj.regionID;
+        appState.regionMap[regionID] = { regionName, ...regionObj };
+
+        Object.entries(regionObj).forEach(([constellationName, constellationObj]) => {
+            if (constellationName === 'regionID') return;
+
+            Object.entries(constellationObj).forEach(([systemName, systemObj]) => {
+                if (systemName === 'constellationID') return;
+
+                Object.entries(systemObj.stations || {}).forEach(([stationID, stationObj]) => {
+                    appState.stationMap[stationID] = stationObj;
+                });
+            });
+        });
+    });
+}
+
+export function getStationName(stationID) {
+    return appState.stationMap[stationID]?.stationName || "Unknown Station";
+}
 
 // 🧱 DOM Element Caching for Early Access
 export function cacheElements() {
@@ -183,13 +212,11 @@ export function cacheElements() {
     elements.regionSelector = document.getElementById('regionSelector');
     elements.viewMarketLink = document.getElementById('viewMarketLink');
     elements.viewHistoryLink = document.getElementById('viewHistoryLink');
-    elements.viewerContainer = document.getElementById('itemViewerContainer');
-    elements.viewerIconWrapper = document.querySelector('.viewer-icon-container');
-
-
-
-    console.log('[Element Cache]', {
-        tables: document.querySelector('.market-tables'),
-        history: document.querySelector('.market-history')
-    });
+    elements.viewerContainer = document.getElementById('itemViewerContainer'); // for right-side header
+    elements.viewerIconWrapper = document.querySelector('.viewer-icon-container'); // for icon display
+    elements.marketTables = document.getElementById('itemPriceTables'); // main tables section
+    elements.historyChart = document.getElementById('itemHistorySection');
+    elements.regionSelector = document.getElementById('regionSelector');         // 🌍 Dropdown for selecting region
+    elements.regionBreadcrumb = document.getElementById('regionBreadcrumb');     // 📍 Shows current region in path
+    elements.regionLabel = document.getElementById('regionLabel');
 }

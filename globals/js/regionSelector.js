@@ -1,38 +1,45 @@
 import { appState, APP_CONFIG, elements } from '../../market/js/marketConfig.js';
-import { fetchMarketOrders } from '../../market/js/marketTables.js';
+import { fetchMarketOrders } from '../../market/js/marketRenderer.js';
+import { fetchMarketHistory, setHistoryViewActive } from '../../market/js/itemPriceHistory.js';
+import { renderItemViewer } from '../../market/js/itemViewer.js';
 
 const listeners = [];
 
 export const RegionSelector = {
     // 🔗 External subscriptions
-    onLocationChange(cb) {
-        listeners.push(cb);
+    onLocationChange(callback) {
+        listeners.push(callback);
     },
 
-    // 🌐 Region data access
+    // 🌐 Region access
     getRegionList() {
-        return appState.regions || {};
+        return appState.regionMap || {};
     },
 
     getRegionID() {
-        return appState.selectedRegionID ?? null;
+        const name = appState.selectedRegionName;
+        return name === 'all' ? 'all' : appState.selectedRegionID ?? APP_CONFIG.DEFAULT_REGION_ID;
     },
 
-    // 🔍 Updated to include both name & ID
     getRegionSummary() {
-        return {
-            region: appState.selectedRegionName,
-            regionID: appState.selectedRegionID ?? null
-        };
+        const name = appState.selectedRegionName;
+        const id = name === 'all' ? 'all' : appState.selectedRegionID ?? APP_CONFIG.DEFAULT_REGION_ID;
+        return { region: name, regionID: id };
     },
 
     // 🚀 Region selection
     setRegion(regionName) {
-        const regionData = appState.regions?.[regionName];
-        appState.selectedRegionName = regionName;
-        appState.selectedRegionID = regionData?.regionID || APP_CONFIG.DEFAULT_REGION_ID;
+        if (regionName === 'all') {
+            appState.selectedRegionName = 'all';
+            appState.selectedRegionID = APP_CONFIG.DEFAULT_REGION_ID;
+            localStorage.setItem('selectedRegion', 'all');
+        } else {
+            const regionData = appState.regions?.[regionName];
+            appState.selectedRegionName = regionName;
+            appState.selectedRegionID = regionData?.regionID || APP_CONFIG.DEFAULT_REGION_ID;
+            localStorage.setItem('selectedRegion', appState.selectedRegionID);
+        }
 
-        localStorage.setItem('selectedRegion', appState.selectedRegionID);
         emitChange();
     },
 
@@ -48,16 +55,23 @@ export const RegionSelector = {
             elements.regionSelector.appendChild(option);
         });
 
-        // 🔄 Restore from saved region
-        const storedRegionID = Number(localStorage.getItem('selectedRegion'));
-        if (!isNaN(storedRegionID)) {
-            const storedRegionName = Object.entries(appState.regions || {}).find(
-                ([_, value]) => value.regionID === storedRegionID
-            )?.[0];
+        // 🔄 Restore saved region (default to 'all' if nothing set)
+        const storedValue = localStorage.getItem('selectedRegion');
+        if (storedValue === 'all' || !storedValue) {
+            elements.regionSelector.value = 'all';
+            appState.selectedRegionName = 'all';
+            appState.selectedRegionID = APP_CONFIG.DEFAULT_REGION_ID;
+        } else {
+            const storedRegionID = Number(storedValue);
+            if (!isNaN(storedRegionID)) {
+                const storedRegionName = Object.entries(appState.regions || {}).find(
+                    ([_, value]) => value.regionID === storedRegionID
+                )?.[0];
 
-            if (storedRegionName) {
-                elements.regionSelector.value = storedRegionName;
-                RegionSelector.setRegion(storedRegionName);
+                if (storedRegionName) {
+                    elements.regionSelector.value = storedRegionName;
+                    RegionSelector.setRegion(storedRegionName);
+                }
             }
         }
 
@@ -67,13 +81,25 @@ export const RegionSelector = {
             RegionSelector.setRegion(selected);
         });
 
-        // 📡 Reactive refresh
+        // 📡 Reactive refresh: update both market and history views
         RegionSelector.onLocationChange(({ regionID }) => {
-            const typeID = window.appState?.selectedTypeID;
+            const itemData = appState.selectedItemData;
+            const typeID = itemData?.type_id;
 
-            if (typeID && regionID) {
+            if (typeID && regionID && itemData) {
                 fetchMarketOrders(typeID, regionID);
+
+                if (appState.activeView === 'history') {
+                    setHistoryViewActive(true, regionID, typeID);
+                    fetchMarketHistory(typeID, regionID).then(() => {
+                    }).catch(err => {
+                        console.warn('[❌ History fetch failed on region change]', err);
+                    });
+                } else {
+                    renderItemViewer(itemData, regionID);
+                }
             }
+
         });
     }
 };

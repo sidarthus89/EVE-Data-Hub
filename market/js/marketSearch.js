@@ -1,6 +1,4 @@
 // 🔍 marketSearch.js
-// Handles dynamic item search, filtering, keyboard navigation, and drill-down into market menu
-
 import { appState, elements, APP_CONFIG } from './marketConfig.js';
 import { handleItemSelection } from './itemDispatcher.js';
 import { RegionSelector } from '../../globals/js/regionSelector.js';
@@ -24,21 +22,26 @@ export function initializeSearch() {
 
     input.addEventListener('input', debounce(() => {
         const query = input.value.trim().toLowerCase();
-        query.length < MIN_LENGTH ? hideSearchResults() : renderSearchResults(query);
+        if (query.length < MIN_LENGTH) {
+            hideSearchResults();
+        } else {
+            renderSearchResults(query);
+        }
     }, 300));
 
     input.addEventListener('keydown', handleKeyNavigation);
 
     input.addEventListener('focus', () => {
         const query = input.value.trim().toLowerCase();
-        if (query.length >= MIN_LENGTH) renderSearchResults(query);
+        if (query.length >= MIN_LENGTH) {
+            renderSearchResults(query);
+        }
     });
 
     results.addEventListener('click', e => {
         const li = e.target.closest('li');
         if (!li?.dataset.typeid) return;
-        const typeID = parseInt(li.dataset.typeid, 10);
-        onItemSelected(typeID);
+        onItemSelected(parseInt(li.dataset.typeid, 10));
     });
 
     document.addEventListener('click', e => {
@@ -48,7 +51,7 @@ export function initializeSearch() {
     });
 }
 
-// 🔎 Filter and Render Search Results
+// 🔎 Render Search Results
 function renderSearchResults(query) {
     const results = elements.searchResults;
     results.innerHTML = '';
@@ -58,8 +61,10 @@ function renderSearchResults(query) {
         .sort((a, b) => a.name.localeCompare(b.name))
         .slice(0, MAX_RESULTS);
 
-    const exactMatch = matches.length === 1 && matches[0].name.toLowerCase() === query;
-    if (exactMatch) {
+    if (
+        matches.length === 1 &&
+        matches[0].name.toLowerCase() === query
+    ) {
         onItemSelected(matches[0].type_id);
         elements.searchBox.value = matches[0].name;
         hideSearchResults();
@@ -78,7 +83,7 @@ function renderSearchResults(query) {
         results.firstChild.classList.add('active');
     }
 
-    results.classList.add('.hidden');
+    results.classList.remove('hidden');
     appState.isSearchActive = true;
 }
 
@@ -93,9 +98,8 @@ function handleKeyNavigation(e) {
         return;
     }
 
-    if (e.key === 'Enter' && current?.dataset?.typeid) {
-        const typeID = parseInt(current.dataset.typeid, 10);
-        onItemSelected(typeID);
+    if (e.key === 'Enter' && current?.dataset.typeid) {
+        onItemSelected(parseInt(current.dataset.typeid, 10));
         elements.searchBox.value = current.textContent;
         hideSearchResults();
         return;
@@ -108,25 +112,28 @@ function handleKeyNavigation(e) {
             ? Math.min(items.length - 1, index + 1)
             : Math.max(0, index - 1);
         items.forEach(li => li.classList.remove('active'));
-        if (items[nextIndex]) items[nextIndex].classList.add('active');
+        if (items[nextIndex]) {
+            items[nextIndex].classList.add('active');
+        }
     }
 }
 
-// 🎯 Item Selection Handler
+// 🧭 Handle Selection Logic
 function onItemSelected(typeID) {
     if (!typeID || isNaN(typeID)) return;
     handleItemSelection(typeID);
     drillDownToItem(typeID);
 }
 
-// 🧹 Hide Results
+// 🧹 Hide Suggestion List
 function hideSearchResults() {
-    elements.searchResults.innerHTML = '';
-    elements.searchResults.classList.remove('.hidden');
+    const results = elements.searchResults;
+    results.innerHTML = '';
+    results.classList.add('hidden');
     appState.isSearchActive = false;
 }
 
-// 🧭 Expand and Scroll to Item in Tree
+// 🧬 Drill Down to Sidebar Tree Node
 export function drillDownToItem(typeID) {
     const path = (function walk(node, trail = []) {
         if (Array.isArray(node)) {
@@ -140,7 +147,7 @@ export function drillDownToItem(typeID) {
             }
         }
         return null;
-    })(appState.marketMenu);
+    })(appState.market);
 
     if (!path?.length) return;
 

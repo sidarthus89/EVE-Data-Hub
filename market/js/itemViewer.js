@@ -1,59 +1,69 @@
-// 🎯 itemViewer.js
-// Handles rendering of item header UI, breadcrumb trail, and selection persistence
+// 📦 itemViewer.js
+// Renders item viewer: name, icon, breadcrumb, visibility
 
-import { APP_CONFIG, appState, elements } from './marketConfig.js';
+import { appState, elements, APP_CONFIG } from './marketConfig.js';
 import { getIconPath } from './marketUtilities.js';
 import { expandMarketPath } from './marketTree.js';
 
+export function renderItemViewer(itemData, regionID) {
+    const typeID = itemData?.type_id;
+    if (!typeID || typeof typeID !== 'number') return;
 
-// 🎨 Internal: Render Header UI for Given Type
-function updateItemHeader(typeID) {
-    const item = appState.flatItemList.find(i => i.type_id === typeID);
-    if (!item) return;
+    appState.selectedTypeID = typeID;
+    appState.selectedRegionID = regionID;
+    window.appState.selectedTypeID = typeID;
+    localStorage.setItem('selectedTypeID', typeID);
 
-    const container = elements.viewerContainer;
-    if (container) {
-        container.innerHTML = '';
-        const icon = document.createElement('img');
-        icon.src = `/market/icons/types/${item.type_id}.png`;
-        icon.alt = item.name;
-        icon.className = 'viewer-icon';
-        container.appendChild(icon);
+    if (elements.searchBox) {
+        elements.searchBox.value = itemData.name || '';
     }
 
-    const itemNameEl = document.getElementById('itemName');
-    const itemIconEl = document.getElementById('itemIcon');
-    const itemBreadcrumbEl = document.getElementById('itemBreadcrumb');
+    const iconFile = itemData.iconFile || '';
+    const iconPath = getIconPath(iconFile);
 
-    if (itemNameEl) itemNameEl.textContent = item.name;
-    if (itemIconEl) itemIconEl.src = getIconPath(typeID);
+    if (elements.itemName) elements.itemName.textContent = itemData.name;
 
-    if (itemBreadcrumbEl) {
-        const segments = findItemBreadcrumb(typeID);
-        itemBreadcrumbEl.innerHTML = '';
-
-        segments.forEach((segment, index) => {
-            const crumbLink = document.createElement('a');
-            crumbLink.textContent = segment;
-            crumbLink.href = '#';
-            crumbLink.className = 'breadcrumb-link';
-            crumbLink.addEventListener('click', e => {
-                e.preventDefault();
-                expandMarketPath(segments.slice(0, index + 1));
-            });
-
-            itemBreadcrumbEl.appendChild(crumbLink);
-
-            if (index < segments.length - 1) {
-                const separatorSpan = document.createElement('span');
-                separatorSpan.textContent = ' / ';
-                itemBreadcrumbEl.appendChild(separatorSpan);
-            }
-        });
+    if (elements.itemIcon) {
+        elements.itemIcon.src = iconPath;
+        elements.itemIcon.alt = itemData.name;
+        elements.itemIcon.onerror = () => {
+            elements.itemIcon.src = APP_CONFIG.FALLBACK_ICON;
+        };
     }
+
+    document.getElementById("itemViewerHeader")?.classList.remove("hidden");
+    document.getElementById("itemViewerSection")?.classList.remove("hidden");
+
+    renderBreadcrumbTrail(typeID);
 }
 
-// 🧭 Build Breadcrumb Trail from Market Tree
+function renderBreadcrumbTrail(typeID) {
+    const itemBreadcrumbEl = document.getElementById('itemBreadcrumb');
+    if (!itemBreadcrumbEl) return;
+
+    const segments = findItemBreadcrumb(typeID);
+    itemBreadcrumbEl.innerHTML = '';
+
+    segments.forEach((segment, index) => {
+        const crumbLink = document.createElement('a');
+        crumbLink.textContent = segment;
+        crumbLink.href = '#';
+        crumbLink.className = 'breadcrumb-link';
+        crumbLink.addEventListener('click', e => {
+            e.preventDefault();
+            expandMarketPath(segments.slice(0, index + 1));
+        });
+
+        itemBreadcrumbEl.appendChild(crumbLink);
+
+        if (index < segments.length - 1) {
+            const separatorSpan = document.createElement('span');
+            separatorSpan.textContent = ' / ';
+            itemBreadcrumbEl.appendChild(separatorSpan);
+        }
+    });
+}
+
 export function findItemBreadcrumb(typeID) {
     const path = [];
 
@@ -62,7 +72,7 @@ export function findItemBreadcrumb(typeID) {
             if (key === '_info') continue;
 
             if (Array.isArray(value)) {
-                const matchedItem = value.find(item => item.typeID == typeID);
+                const matchedItem = value.find(item => Number(item.typeID) === Number(typeID));
                 if (matchedItem) {
                     const cleanTrail = trail.filter(t => t !== 'items');
                     if (key !== 'items') cleanTrail.push(key);
@@ -76,36 +86,6 @@ export function findItemBreadcrumb(typeID) {
         return false;
     }
 
-    walk(appState.marketMenu);
+    walk(appState.market);
     return path.length ? path : ['Unknown Category'];
-}
-
-// 🖱️ Selection Entry Point from External Modules
-export function updateItemDetails(itemData) {
-    const typeID = itemData?.type_id;
-    if (!typeID) return;
-    updateItemHeader(typeID);
-}
-
-// 🎛️ UI Selection Entry Point from Menu Clicks, etc.
-export function selectItem(typeID) {
-    updateItemHeader(typeID);
-    localStorage.setItem('selectedTypeID', typeID);
-    appState.selectedTypeID = typeID;
-
-    const item = appState.flatItemList.find(i => i.type_id === typeID);
-    if (elements.searchBox) elements.searchBox.value = item?.name || '';
-
-    const viewerHeader = document.getElementById("itemViewerHeader");
-    if (viewerHeader?.classList.contains("hidden")) {
-        viewerHeader.classList.remove("hidden");
-    }
-
-    if (appState.activeView === 'market') {
-        elements.marketTables?.classList.add('.hidden');
-        elements.historyChart?.classList.remove('.hidden');
-    } else if (appState.activeView === 'history') {
-        elements.marketTables?.classList.remove('.hidden');
-        elements.historyChart?.classList.add('.hidden');
-    }
 }

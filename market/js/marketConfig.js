@@ -2,12 +2,11 @@
 // Provides constants, shared state, and DOM references for the market module
 
 export const APP_CONFIG = {
-    DATA_PATH: "./market/data/",
-    REGIONS_FILE: "regions.json",
-    STATIONS_FILE: "stations.json",
-    MARKET_MENU_FILE: "marketMenu.json",
+    DATA_PATH: "/",
+    MARKET_FILE: "market/data/market.json",
+    LOCATIONS_FILE: "globals/data/locations.json",
     FALLBACK_ICON: "globals/assets/icons/favicon.png",
-    ICON_BASE_URL: "market/icons/type/",
+    ICON_BASE_URL: "market/icons/types/",
     ESI_BASE_URL: "https://esi.evetech.net/latest/markets/",
     DEFAULT_REGION_ID: 10000002,
     SEARCH_MIN_LENGTH: 3
@@ -16,7 +15,7 @@ export const APP_CONFIG = {
 export const appState = {
     regions: {},
     stations: {},
-    marketMenu: {},
+    market: {},
     flatItemList: [],
     currentSortState: {},
 

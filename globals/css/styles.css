@@ -17,6 +17,11 @@ body {
     color: #b4b4b4;
 }
 
+
+.hidden {
+    display: none !important;
+}
+
 main,
 .content,
 #main-content {
@@ -221,15 +226,12 @@ nav.global-nav {
     box-shadow: 0 0 8px rgba(8, 74, 98, 0.25);
 }
 
-.global-nav .nav-title.active-nav,
-.nav-dropdown-label.active-nav,
-.global-nav a.active-nav {
-    background-color: #0e83ae;
-    color: #000;
-    box-shadow: 0 0 12px rgba(8, 74, 98, 0.5);
+.global-nav .nav-title.active-nav {
+    background-color: #1f262b;
+    color: #ccc;
+    box-shadow: none;
     border-color: #234e5b;
 }
-
 
 /* ─── Global Footer Bar ───────────────────────────────── */
 .global-footer {
@@ -272,6 +274,14 @@ nav.global-nav {
 .content {
     padding: 20px;
     margin-top: 75px;
+}
+
+.market-layout {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
 }
 
 /* ─── Cookie Consent ───────────────────────────────────── */

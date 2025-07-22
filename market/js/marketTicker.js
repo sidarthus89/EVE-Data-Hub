@@ -1,4 +1,4 @@
-import { fetchAllRegionOrders } from './itemPrices.js';
+import { fetchAllRegionOrders } from './marketLoader.js';
 
 const PLEX_TYPE_ID = 44992;
 

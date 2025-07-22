@@ -1,127 +1,105 @@
-// 🧭 Market Globals
 import { APP_CONFIG, appState, elements } from './marketConfig.js';
 import { handleItemSelection } from './itemDispatcher.js';
 import { cacheElements } from './marketUtilities.js';
-
-// 🧱 Initial Loaders
-import { loadRegions, loadStations, loadMarketMenu } from './marketDataFetcher.js';
+import { loadLocations, loadMarket } from './marketLoader.js';
 import { loadTickerData } from './marketTicker.js';
-import { fetchMarketOrders } from './marketTables.js';
-
-// 📦 UI & Interaction Modules
+import { fetchMarketOrders } from './marketRenderer.js';
 import { initializeMarketMenu } from './marketTree.js';
-import { setupEventListeners } from './marketEvents.js';
+import { setupEventListeners } from './sidebarToggle.js';
 import { renderQuickbar } from './marketQuickbar.js';
 import { initializeSearch } from './marketSearch.js';
-import { setHistoryViewActive, fetchMarketHistory } from './itemPriceHistory.js';
-import {
-    renderScopedHistoryChart,
-    renderNavigatorChart
-} from './historyChart_Slider.js';
-
-// 🌍 Global Location Logic
+import { setHistoryViewActive, fetchMarketHistory, renderHistoryView } from './itemPriceHistory.js';
+import { renderScopedHistoryChart } from './historyChart_Slider.js';
 import { RegionSelector } from '../../globals/js/regionSelector.js';
+import { buildLocationMaps } from './marketUtilities.js';
 
-// 🌐 Expose API Globals
+async function initializeMarketData() {
+    try {
+        await Promise.all([
+            loadLocations(),
+            loadMarket()
+        ]);
+    } catch (err) {
+        console.error("❌ Failed to initialize market data:", err);
+        throw err;
+    }
+}
+
 window.appState = appState;
 window.APP_CONFIG = APP_CONFIG;
 window.handleItemSelection = handleItemSelection;
 
 document.addEventListener('DOMContentLoaded', async () => {
     appState.activeView = 'market';
-    console.log('[Main Init] View:', appState.activeView);
-    console.log('[DOM Cache]', {
-        tables: elements.marketTables,
-        history: elements.historyChart
-    });
-
 
     try {
-        // 🌎 Cache DOM Elements
         cacheElements();
+        window.elements = elements;
 
-        // 🌐 Load Region & Market Data
-        await Promise.all([
-            loadRegions(),
-            loadStations(),
-            loadMarketMenu()
-        ]);
+        await initializeMarketData();
 
-        // 🧹 Flatten Market Tree for Search Index
-        appState.flatItemList = extractItemList(appState.marketMenu);
+        if (!appState.market || typeof appState.market !== 'object') {
+            throw new Error("❌ appState.market is undefined or malformed");
+        }
+
+
+        appState.flatItemList = extractItemList(appState.market);
         appState.selectedTypeID = null;
         localStorage.removeItem('selectedTypeID');
 
-        // 🎛️ Initialize UI Components
-        RegionSelector.initializeDropdown();
-        initializeMarketMenu();
-        renderQuickbar(false);
-        setupEventListeners();
-        initializeSearch();
+        initializeAppUI();
 
-
-        // 📈 Initial Ticker Load
         await loadTickerData();
 
-        // 🖱️ History/Market Tab Switching
-        elements.viewMarketLink.addEventListener('click', e => {
+        const marketLink = document.getElementById('viewMarketLink');
+        const historyLink = document.getElementById('viewHistoryLink');
+        const underline = document.querySelector('.tab-underline');
+
+        marketLink.addEventListener('click', e => {
             e.preventDefault();
-
-            const regionID = RegionSelector.getRegionID() ?? APP_CONFIG.DEFAULT_REGION_ID;
-            const itemID = appState.selectedTypeID;
-
-            setHistoryViewActive(false, regionID, itemID);
+            activateTab(marketLink);
+            setHistoryViewActive(false);
         });
 
-
-        elements.viewHistoryLink.addEventListener('click', async e => {
+        historyLink.addEventListener('click', e => {
             e.preventDefault();
-            console.log('[📌 Click] View History link clicked');
-
-            const regionID = RegionSelector.getRegionID() ?? APP_CONFIG.DEFAULT_REGION_ID;
-            const itemID = appState.selectedTypeID;
-
-            console.log('[🧭 IDs]', { regionID, itemID });
-
-            if (!regionID || !itemID) {
-                console.warn('❌ Cannot activate history view: missing regionID or itemID.');
-                return;
-            }
-
-            // ✅ Activate history view in state
-            setHistoryViewActive(true, regionID, itemID);
-
-            // ✅ Toggle chart/table visibility
-            elements.marketTables?.classList.remove('.hidden');
-            elements.historyChart?.classList.add('.hidden');
-
-            try {
-                console.log('[📡 Fetching] Requesting price history...');
-                await fetchMarketHistory(itemID, regionID);
-                console.log('[📦 Data] Market history loaded:', appState.marketHistory?.[itemID]);
-
-                appState.selectedTypeID = itemID;
-
-                // ✅ Defer chart render slightly for smoother transition
-                setTimeout(() => {
-                    console.log('[📊 Rendering] Starting chart render...');
-                    renderNavigatorChart(itemID);
-                    renderScopedHistoryChart(regionID, itemID);
-                }, 200);
-            } catch (err) {
-                console.warn(`❌ History render failed for ${itemID} in region ${regionID}:`, err);
-            }
+            activateTab(historyLink);
+            renderHistoryView();
         });
 
-
-
+        requestAnimationFrame(() => {
+            const activeTab = document.querySelector('.market-link.active');
+            if (activeTab) {
+                animateUnderline(activeTab);
+            } else {
+                console.warn('[Tab Init] No active tab found for underline.');
+            }
+        });
 
     } catch (err) {
         console.error('Initialization failed:', err);
     }
 });
 
-// 🧠 Utility: Flatten Market Tree
+function animateUnderline(targetLink) {
+    const parent = targetLink.parentElement;
+    const linkRect = targetLink.getBoundingClientRect();
+    const parentRect = parent.getBoundingClientRect();
+
+    const offsetLeft = linkRect.left - parentRect.left;
+    const width = linkRect.width;
+
+    underline.style.width = `${width}px`;
+    underline.style.transform = `translateX(${offsetLeft}px)`;
+}
+
+function activateTab(tab) {
+    marketLink.classList.remove('active');
+    historyLink.classList.remove('active');
+    tab.classList.add('active');
+    animateUnderline(tab);
+}
+
 function extractItemList(menu) {
     const items = [];
     function walk(node) {
@@ -136,12 +114,19 @@ function extractItemList(menu) {
     }
     walk(menu);
     return items.map(i => ({
-        type_id: i.typeID,
+        type_id: Number(i.typeID),
         name: i.typeName
     }));
 }
 
-// Order Fetcher/Refresh
+function initializeAppUI() {
+    RegionSelector.initializeDropdown();
+    initializeMarketMenu();
+    renderQuickbar(false);
+    setupEventListeners();
+    initializeSearch();
+}
+
 function refreshOrders() {
     const typeID = appState.selectedTypeID;
     const regionName = RegionSelector.getRegionSummary().region || 'all';

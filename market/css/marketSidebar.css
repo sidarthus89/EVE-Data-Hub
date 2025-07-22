@@ -1,9 +1,4 @@
 /* ── Sidebar Layout ───────────── */
-.market-layout {
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-}
 
 #sidebar {
     color: #ccc;
@@ -260,7 +255,6 @@ ul.subcategories li {
     padding: 6px 8px;
     position: relative;
     gap: 6px;
-    /* adds spacing between label and button */
 }
 
 .market-item:hover,
@@ -277,6 +271,45 @@ ul.subcategories li {
     display: inline-block;
     margin-right: 6px;
     flex-grow: 0;
+}
+
+.quickbar-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 20px;
+}
+
+.qb-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    text-align: center;
+    min-width: 0;
+}
+
+.qb-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    line-height: 0;
+}
+
+.qb-btn img {
+    display: block;
+    width: 24px;
+    height: 24px;
+}
+
+.qb-label {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #aaa;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .quickbar-btn {

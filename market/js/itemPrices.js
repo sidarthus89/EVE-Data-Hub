@@ -1,7 +1,7 @@
 // Renders dynamic buy/sell market data, supports sorting, resizing, pagination, and ticker summary
 
 import { APP_CONFIG, appState } from './marketConfig.js';
-import { updateItemDetails } from './itemViewer.js';
+import { handleItemSelection } from './itemDispatcher.js';
 import { formatISK, formatExpires } from './marketUtilities.js';
 
 const RESULTS_PER_PAGE = 100;
@@ -59,15 +59,14 @@ export async function fetchMarketOrders(typeID, selectedRegion) {
     }
 }
 
-// 🧭 Region ID Resolver
-
 
 function resolveRegionID(regionName) {
     return (
-        appState.regions?.regions?.find(r => r.regionName === regionName)?.regionID ||
+        appState.regions?.[regionName]?.regionID ||
         APP_CONFIG.DEFAULT_REGION_ID
     );
 }
+
 
 // 📦 ESI Fetch: Region Orders (Paginated)
 export async function fetchRegionOrders(typeID, regionID) {
@@ -92,7 +91,7 @@ export async function fetchRegionOrders(typeID, regionID) {
 
 // 🌍 ESI Fetch: Aggregated Across All Regions
 export async function fetchAllRegionOrders(typeID) {
-    const regionList = Object.values(appState.regions);
+    const regionList = Object.values(appState.regionMap);
     const results = await Promise.all(
         regionList.map(region => fetchRegionOrders(typeID, region.regionID))
     );
@@ -173,7 +172,7 @@ function renderOrderTables(typeID, sellOrders, buyOrders) {
     // 🖼️ Refresh header content
     updateItemHeader(typeID);
 
-    document.getElementById('itemPriceTables')?.classList.add('.hidden');
+    document.getElementById('itemPriceTables')?.classList.add("hidden");
 }
 
 // 📄 Pagination Controller

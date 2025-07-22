@@ -4,6 +4,7 @@
     gap: 16px;
     align-items: flex-start;
     padding: 10px 0;
+    outline: 1px red;
 }
 
 .viewer-header-left {
@@ -21,12 +22,19 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    outline: 1px red;
 }
 
 .item-name {
     font-size: 16px;
     font-weight: bold;
     color: #ddd;
+}
+
+.viewer-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
 }
 
 /* ─── Breadcrumb Trail ─────── */
@@ -70,21 +78,67 @@
     color: #fff;
 }
 
-.market-links {
+.market-link {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 4px;
+    font-weight: bold;
+    color: #ccc;
+    text-decoration: none !important;
+    transition: color 0.2s ease;
+}
+
+.market-link:visited,
+.market-link:hover,
+.market-link:focus,
+.market-link:active {
+    color: #fff;
+    text-decoration: none !important;
+}
+
+.market-link.active {
+    color: #fff;
+    text-decoration: none !important;
+}
+
+.market-link:visited {
+    color: #ccc;
+}
+
+.market-link:hover {
+    color: #fff;
+}
+
+.market-tabs {
+    position: relative;
     display: flex;
     gap: 16px;
-    font-size: 14px;
     margin-top: 4px;
 }
 
-.market-links a {
-    color: #ccc;
-    text-decoration: none;
-    font-weight: bold;
-    cursor: pointer;
+
+.market-tabs:visited {
+    color: #ccc !important;
 }
 
-.market-links a:hover {
+.market-tabs:hover {
     color: #fff;
-    text-decoration: underline;
+}
+
+.market-tabs.active::after {
+    transform: scaleX(1);
+}
+
+.tab-underline {
+    position: absolute;
+    bottom: 0;
+    height: 2px;
+    width: 100px;
+    /* adjust to fit tab width or match target */
+    background: linear-gradient(to right, transparent, #00bfff, transparent);
+    border-radius: 2px;
+    pointer-events: none;
+    transition: transform 0.35s ease-in-out, opacity 0.2s ease;
+    transform-origin: left;
+    opacity: 1;
 }

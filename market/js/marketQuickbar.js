@@ -1,5 +1,5 @@
 import { appState, elements } from "./marketConfig.js";
-import { selectItem } from "./itemViewer.js";
+import { handleItemSelection } from './itemDispatcher.js';
 
 renderQuickbar(true); // Or toggle based on view state
 
@@ -38,9 +38,27 @@ export function renderQuickbar(show) {
         headerRow.id = "quickbarHeader";
         headerRow.className = "quickbar-header";
         headerRow.innerHTML = `
-            <button class="qb-btn" title="Export"><img src="../assets/icons/export.png" /></button>
-            <button class="qb-btn" title="Import"><img src="../assets/icons/import.png" /></button>
-            <button class="qb-btn" title="Delete All"><img src="../assets/icons/trash.png" /></button>
+            <div class="qb-action">
+                <button class="qb-btn" title="Export">
+                    <img src="./market/icons/export.png" alt="Export" />
+                </button>
+                <span class="qb-label">Export</span>
+            </div>
+
+            <div class="qb-action">
+                <button class="qb-btn" title="Import">
+                    <img src="./market/icons/import.png" alt="Import" />
+                </button>
+                <span class="qb-label">Import</span>
+            </div>
+
+            <div class="qb-action">
+                <button class="qb-btn" title="Delete All">
+                    <img src="./market/icons/delete-all.png" alt="Delete All" />
+                </button>
+                <span class="qb-label">Delete All</span>
+            </div>
+
         `;
         if (container) container.insertBefore(headerRow, quickbarEl);
         setupQuickbarActions();
@@ -101,7 +119,6 @@ function setupQuickbarActions() {
     exportBtn?.addEventListener("click", () => {
         const data = JSON.stringify(appState.quickbarItems || [], null, 2);
         navigator.clipboard.writeText(data)
-            .then(() => console.log("Quickbar copied to clipboard"))
             .catch(err => console.warn("Clipboard error", err));
     });
 

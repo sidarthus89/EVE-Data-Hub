@@ -1,49 +1,51 @@
-// 📦 itemDispatcher.js
-// Handles item selection, triggers order/history/chart updates
-
-import { appState, APP_CONFIG } from './marketConfig.js';
-import { updateItemDetails } from './itemViewer.js';
-import { fetchMarketOrders } from './marketTables.js';
-import { fetchMarketHistory, drawHistoryChart, setHistoryViewActive } from './itemPriceHistory.js';
 import { RegionSelector } from '../../globals/js/regionSelector.js';
+import { fetchMarketOrders } from './marketRenderer.js';
+import { renderItemViewer } from './itemViewer.js';
+import { fetchMarketHistory, setHistoryViewActive } from './itemPriceHistory.js';
+import { renderScopedHistoryChart } from './historyChart_Slider.js';
+import { renderHistoryView } from './itemPriceHistory.js'
 
 export async function handleItemSelection(typeID) {
-    console.log('[Dispatcher] View Mode:', appState.activeView);
-    console.log('[Dispatcher] Selected:', typeID);
-
+    typeID = Number(typeID);
     if (!typeID || typeof typeID !== 'number') return;
 
-    appState.selectedItemId = typeID;
-    const itemData = appState.flatItemList.find(item => item.type_id === typeID);
+    const itemData = appState.flatItemList.find(item => Number(item.type_id) === typeID);
+
     if (!itemData) return;
-
-    // ⏳ Update UI fields
-    updateItemDetails(itemData);
-
-    const marketTables = document.querySelector('.market-tables');
-    const historyChart = document.querySelector('.market-history');
 
     const regionID = RegionSelector.getRegionID() ?? APP_CONFIG.DEFAULT_REGION_ID;
     const regionName = RegionSelector.getRegionSummary().region ?? 'all';
 
-    if (appState.activeView === 'history') {
-        // ⏫ View-state and DOM update
-        setHistoryViewActive(true, regionID, typeID);
-        marketTables?.classList.remove('.hidden');
-        historyChart?.classList.add('.hidden');
+    appState.selectedTypeID = typeID;
+    appState.selectedItemData = itemData;
 
-        // 📡 Fetch + Render
+    document.getElementById("itemViewerHeader")?.classList.remove("hidden");
+    document.getElementById("itemViewerSection")?.classList.remove("hidden");
+
+    renderItemViewer(itemData, regionID);
+
+    const marketTables = document.querySelector('.market-tables');
+    const historyChart = document.querySelector('.market-history');
+
+
+    if (appState.activeView === 'history') {
+        marketTables?.classList.add("hidden");
+        document.querySelector('.market-history')?.classList.add("hidden");
+        historyChart?.classList.remove("hidden"); //optional
+
+        setHistoryViewActive(true, regionID, typeID);
+
         try {
             await fetchMarketHistory(typeID, regionID);
-            drawHistoryChart(typeID);
+            renderScopedHistoryChart(regionID, typeID);
+
         } catch (err) {
             console.warn('❌ Failed to fetch/render price history:', err);
         }
 
     } else {
-        // ⏫ Show market tables
-        marketTables?.classList.add('.hidden');
-        historyChart?.classList.remove('.hidden');
+        marketTables?.classList.remove("hidden");
+        historyChart?.classList.add("hidden");
 
         try {
             await fetchMarketOrders(typeID, regionName);

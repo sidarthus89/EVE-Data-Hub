@@ -1,99 +1,66 @@
 import { APP_CONFIG, appState } from './marketConfig.js';
-
-let chartInstance = null;
-let debounceTimer;
-
-// 📈 Fetch 365-day price history for a single item
+import { renderScopedHistoryChart } from './historyChart_Slider.js';
 
 export async function fetchMarketHistory(typeID, selectedRegion) {
-    // 1) Resolve regionID
-    let regionID = APP_CONFIG.DEFAULT_REGION_ID;
-
-    regionID = Number(selectedRegion) || APP_CONFIG.DEFAULT_REGION_ID;
-
-
-
-    // 2) Build and fire the URL
+    const regionID = Number(selectedRegion) || APP_CONFIG.DEFAULT_REGION_ID;
     const url = `${APP_CONFIG.ESI_BASE_URL}${regionID}/history/?type_id=${typeID}`;
+
     try {
         const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
         if (!Array.isArray(json)) throw new Error(`Bad format for ${typeID}`);
 
-        // 3) Keep the last 365 records
-        appState.marketHistory = appState.marketHistory || {};
+        appState.marketHistory ??= {};
         appState.marketHistory[typeID] = json.slice(-365);
-    }
-    catch (err) {
-        console.error(`History fetch failed for ${typeID}:`, err);
-        appState.marketHistory = appState.marketHistory || {};
+    } catch (err) {
+        console.error(`❌ History fetch failed for ${typeID}:`, err);
+        appState.marketHistory ??= {};
         appState.marketHistory[typeID] = [];
     }
 }
 
-
-// 🧠 Compute Moving Average
-function computeMovingAverage(data, key, period) {
-    const result = [];
-    for (let i = 0; i < data.length; i++) {
-        if (i < period - 1) {
-            result.push(null);
-            continue;
-        }
-        const slice = data.slice(i - period + 1, i + 1);
-        const avg = slice.reduce((sum, d) => sum + d[key], 0) / period;
-        result.push(avg);
-    }
-    return result;
-}
-
-// 🧭 Toggle between Market and History views
 export function setHistoryViewActive(isActive) {
     const historyPanel = document.getElementById('itemHistorySection');
     const marketPanel = document.getElementById('itemPriceTables');
 
     if (isActive) {
-        historyPanel?.classList.remove('hidden');
-        historyPanel?.classList.add('.hidden');
-
-        marketPanel?.classList.add('hidden');
-        marketPanel?.classList.remove('.hidden');
+        marketPanel.classList.add("hidden");
+        historyPanel.classList.remove("hidden");
     } else {
-        marketPanel?.classList.remove('hidden');
-        marketPanel?.classList.add('.hidden');
-
-        historyPanel?.classList.add('hidden');
-        historyPanel?.classList.remove('.hidden');
+        historyPanel.classList.add("hidden");
+        marketPanel.classList.remove("hidden");
     }
 
     document.getElementById('viewMarketLink')?.classList.toggle('active', !isActive);
     document.getElementById('viewHistoryLink')?.classList.toggle('active', isActive);
+
+    const canvas = getChartCanvas();
+    if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+    } else {
+        console.warn('[⚠️ Chart] No canvas element found');
+    }
 }
 
-export function drawHistoryChart(typeID = appState.selectedItemId) {
+export function renderHistoryView() {
+    const typeID = appState.selectedTypeID;
+    const regionID = appState.selectedRegionID;
 
-    console.log('[Chart Triggered]', typeID);
-
-    const chartContainer = document.querySelector('.market-history');
-    const marketTables = document.querySelector('.market-tables');
-
-    // Toggle views
-    marketTables?.classList.remove('.hidden');
-    chartContainer?.classList.add('.hidden');
-
-    if (!typeID || typeof typeID !== 'number') {
-        chartContainer.innerHTML = '<p>No item selected.</p>';
+    if (!typeID || !regionID) {
+        console.warn('⚠️ No item selected — skipping history view render.');
         return;
     }
 
-    const priceData = appState.priceHistory?.[typeID];
-    if (!priceData || priceData.length === 0) {
-        chartContainer.innerHTML = '<p>No price history available for this item.</p>';
-    } else {
-        renderChart(chartContainer, priceData); // Your existing draw logic
-    }
+    setHistoryViewActive(true);
+
+    fetchMarketHistory(typeID, regionID).then(() => {
+        requestAnimationFrame(() => {
+            renderScopedHistoryChart(regionID, typeID);
+        });
+    });
 }
 
-
-
+function getChartCanvas() {
+    return document.getElementById('historyChart');
+}

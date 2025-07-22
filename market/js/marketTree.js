@@ -33,7 +33,7 @@ export function buildFlatItemList(menuData) {
 }
 
 export function initializeMarketMenu() {
-    const menuData = appState.marketMenu;
+    const menuData = appState.market;
     elements.menuList.innerHTML = '';
     buildFlatItemList(menuData);
 
@@ -57,7 +57,7 @@ export function getGroupIcon(groupID, groupNode) {
                 }
             }
         }
-        iconFile = findIn(appState.marketMenu);
+        iconFile = findIn(appState.marke);
     }
 
     return iconFile
@@ -199,3 +199,24 @@ export function expandMarketPath(segmentChain = []) {
         }
     }
 }
+
+function collapseAllGroups() {
+    const allGroups = document.querySelectorAll('#menuList li.collapsible');
+
+    allGroups.forEach(group => {
+        group.classList.remove('expanded');
+        group.setAttribute('aria-expanded', 'false');
+
+        const arrow = group.querySelector('.group-arrow');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+
+        const subList = group.querySelector('.subcategories');
+        if (subList) {
+            subList.classList.remove('show');
+            subList.style.display = ''; // ← this removes the inline style so CSS can take over again
+        }
+    });
+
+}
+
+document.getElementById('collapseAllBtn')?.addEventListener('click', collapseAllGroups);

@@ -1,220 +1,274 @@
 import { appState } from './marketConfig.js';
 
 let chartInstance = null;
-let debounceTimer = null;
-let navigatorChartInstance = null;
+let sliderStart = 335;
+let sliderEnd = 365;
 
-
-// 🔢 Compute Moving Average
 function computeMovingAverage(data, key, period) {
   return data.map((_, i, arr) => {
     if (i < period - 1) return null;
-    return arr.slice(i - period + 1, i + 1).reduce((sum, d) => sum + d[key], 0) / period;
+    const slice = arr.slice(i - period + 1, i + 1);
+    return slice.reduce((sum, d) => sum + d[key], 0) / period;
   });
 }
 
-// 📊 Render Price History Chart
 export function renderScopedHistoryChart(regionID, typeID) {
-  console.log("[chart] Drawing history chart for:", { regionID, typeID });
-
-  const fullHistory = appState.marketHistory?.[typeID];
-  if (!fullHistory?.length) {
-    console.warn('No history data found for:', typeID);
-    return;
-  }
-
-  const { leftValue, rightValue } = window.chartSlider?.getValues?.() || { leftValue: 0, rightValue: 30 };
-  const sliceStart = Math.max(365 - rightValue, 0);
-  const sliceEnd = Math.min(365 - leftValue, fullHistory.length);
-  const history = fullHistory.slice(sliceStart, sliceEnd);
-
-  if (!history.length) {
-    console.warn('Scoped slice returned no entries:', { sliceStart, sliceEnd });
-    return;
-  }
-
+  const section = document.getElementById('itemHistorySection');
   const canvas = document.getElementById('historyChart');
-  const ctx = canvas?.getContext('2d');
-  if (!canvas || !ctx) {
-    console.error('Canvas context missing for #historyChart');
+
+  if (!canvas || !section) {
+    console.error('❌ Missing canvas or section container');
     return;
   }
 
-  const labels = history.map(h =>
-    new Date(h.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-  );
-  const medians = history.map(h => h.average);
-  const volumes = history.map(h => h.volume);
-  const ma5 = computeMovingAverage(history, 'average', 5);
-  const ma20 = computeMovingAverage(history, 'average', 20);
+  const container = canvas.parentElement;
 
-  if (chartInstance) chartInstance.destroy();
+  function checkAndRender(attempts = 0) {
+    const sectionHeight = section.offsetHeight;
+    const containerHeight = container?.offsetHeight || 0;
+    const isDisplayed = getComputedStyle(section).display !== 'none';
 
-  chartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        {
-          type: 'line',
-          label: 'Average Price',
-          data: medians,
-          borderColor: '#ffcc33',
-          fill: false, // ⛔ No fill
-          pointRadius: 3,
-          pointBackgroundColor: '#ffcc33',
-          yAxisID: 'y'
-        },
-        {
-          type: 'line',
-          label: '5-Day MA',
-          data: ma5,
-          borderColor: '#66ccff',
-          fill: false,
-          pointRadius: 0,
-          tension: 0.3,
-          yAxisID: 'y'
-        },
-        {
-          type: 'line',
-          label: '20-Day MA',
-          data: ma20,
-          borderColor: '#ff6633',
-          fill: false,
-          pointRadius: 0,
-          tension: 0.3,
-          yAxisID: 'y'
-        },
-        {
-          type: 'bar',
-          label: 'Volume',
-          data: volumes,
-          backgroundColor: 'rgba(0,255,153,0.3)',
-          yAxisID: 'y1'
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          ticks: { color: '#ccc' },
-          grid: { color: '#222' }
-        },
-        y: {
-          position: 'left',
-          title: { display: true, text: 'ISK Price', color: '#ccc' },
-          ticks: { color: '#ccc' },
-          grid: { color: '#333' }
-        },
-        y1: {
-          position: 'right',
-          title: { display: true, text: 'Volume', color: '#ccc' },
-          ticks: { color: '#ccc' },
-          grid: { drawOnChartArea: false }
-        }
-      },
-      plugins: {
-        legend: { labels: { color: '#ccc' } },
-        tooltip: { mode: 'index', intersect: false },
-        zoom: {
-          wheel: { enabled: true },
-          pinch: { enabled: true },
-          mode: 'y',
-          scaleMode: 'y'
-        }
-
-      }
+    if (isDisplayed && sectionHeight > 0 && containerHeight > 0) {
+      setupSliderInteractivity();
+      renderChart();
+    } else if (attempts < 50) {
+      setTimeout(() => checkAndRender(attempts + 1), 50);
+    } else {
+      container.style.height = '400px';
+      setupSliderInteractivity();
+      renderChart();
     }
-  });
-
-  const rangeDisplay = document.getElementById('rangeDisplay');
-  if (rangeDisplay) {
-    rangeDisplay.textContent = `${rightValue - leftValue} days`;
-  }
-}
-
-// 📉 Render Compact Navigator Chart
-export function renderNavigatorChart(typeID) {
-  const fullHistory = appState.marketHistory?.[typeID];
-  if (!fullHistory?.length) return;
-
-  const canvas = document.getElementById('navigatorChart');
-  const ctx = canvas?.getContext('2d');
-  if (!canvas || !ctx) return;
-
-  // 🧼 Destroy previous chart instance
-  if (navigatorChartInstance) {
-    navigatorChartInstance.destroy();
-    navigatorChartInstance = null;
   }
 
-  const labels = fullHistory.map(h =>
-    new Date(h.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-  );
-  const prices = fullHistory.map(h => h.average);
-
-  navigatorChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Navigator Trend',
-        data: prices,
-        borderColor: '#aaa',
-        backgroundColor: 'rgba(180,180,180,0.3)',
-        fill: true,
-        pointRadius: 0,
-        tension: 0.2
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { display: false },
-        tooltip: { enabled: false }
-      },
-      scales: {
-        x: { ticks: { display: false }, grid: { display: false } },
-        y: { display: false }
-      }
+  function renderChart() {
+    const fullHistory = appState.marketHistory?.[typeID];
+    if (!fullHistory?.length) {
+      console.warn('⚠️ No history data available for:', typeID);
+      return;
     }
-  });
+
+    const history = fullHistory.slice(sliderStart, sliderEnd);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('❌ Canvas context missing');
+      return;
+    }
+
+    canvas.removeAttribute('style');
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+
+    const labels = history.map(h =>
+      new Date(h.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    );
+    const medians = history.map(h => h.average);
+    const lows = history.map(h => h.low);
+    const highs = history.map(h => h.high);
+    const volumes = history.map(h => h.volume);
+    const ma5 = computeMovingAverage(history, 'average', 5);
+    const ma20 = computeMovingAverage(history, 'average', 20);
+
+    if (chartInstance) chartInstance.destroy();
+
+    try {
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              type: 'line',
+              label: 'Median Daily Price',
+              data: medians,
+              borderColor: '#ffcc33',
+              pointRadius: 2,
+              fill: false,
+              yAxisID: 'y'
+            },
+            {
+              type: 'line',
+              label: 'Min Price',
+              data: lows,
+              borderColor: '#999',
+              borderDash: [4, 2],
+              fill: false,
+              pointRadius: 0,
+              tension: 0.2,
+              yAxisID: 'y'
+            },
+            {
+              type: 'line',
+              label: 'Max Price',
+              data: highs,
+              borderColor: '#999',
+              borderDash: [4, 2],
+              fill: false,
+              pointRadius: 0,
+              tension: 0.2,
+              yAxisID: 'y'
+            },
+            {
+              type: 'line',
+              label: '5-Day MA',
+              data: ma5,
+              borderColor: '#66ccff',
+              fill: false,
+              pointRadius: 0,
+              tension: 0.3,
+              yAxisID: 'y'
+            },
+            {
+              type: 'line',
+              label: '20-Day MA',
+              data: ma20,
+              borderColor: '#ff6633',
+              fill: false,
+              pointRadius: 0,
+              tension: 0.3,
+              yAxisID: 'y'
+            },
+            {
+              type: 'bar',
+              label: 'Volume',
+              data: volumes,
+              backgroundColor: 'rgba(0,255,153,0.3)',
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: false,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'nearest',
+            intersect: false
+          },
+          scales: {
+            x: {
+              ticks: { color: '#ccc' },
+              grid: { color: '#222' }
+            },
+            y: {
+              position: 'left',
+              title: { display: true, text: 'ISK Price', color: '#ccc' },
+              ticks: { color: '#ccc' },
+              grid: { color: '#333' }
+            },
+            y1: {
+              position: 'right',
+              title: { display: true, text: 'Volume', color: '#ccc' },
+              ticks: { color: '#ccc' },
+              grid: { drawOnChartArea: false }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: { color: '#ccc' }
+            },
+            tooltip: {
+              mode: 'nearest',
+              intersect: false
+            }
+          }
+        }
+      });
+    } catch (error) {
+      console.error('❌ Chart.js error:', error);
+    }
+  }
+
+  checkAndRender();
 }
 
-export function makeScopeOverlayDraggable() {
-  const overlay = document.getElementById('scopeOverlay');
-  const wrapper = document.getElementById('navigatorWrapper');
-  if (!overlay || !wrapper) return;
+export function updateSliderScope(leftPx, widthPx) {
+  const overlay = document.getElementById('chartSliderOverlay');
+  const totalDays = 365;
+  const overlayWidth = overlay.offsetWidth;
+  const pxPerDay = overlayWidth / totalDays;
 
-  let startX = 0;
-  let startLeft = 0;
-  let dragging = false;
+  sliderStart = Math.max(0, Math.floor(leftPx / pxPerDay));
+  sliderEnd = Math.min(totalDays, Math.floor((leftPx + widthPx) / pxPerDay));
 
-  overlay.addEventListener('mousedown', e => {
-    dragging = true;
-    startX = e.clientX;
-    startLeft = overlay.offsetLeft;
+  const counter = document.querySelector('.slider-counter');
+  if (counter) counter.textContent = `${sliderEnd - sliderStart}d`;
 
-    const wrapperRect = wrapper.getBoundingClientRect();
+  renderChart();
+}
 
-    function onMove(e) {
-      if (!dragging) return;
-      const deltaX = e.clientX - startX;
-      const newLeft = Math.max(0, Math.min(startLeft + deltaX, wrapperRect.width - overlay.offsetWidth));
-      overlay.style.left = `${(newLeft / wrapperRect.width) * 100}%`;
-    }
+function setupSliderInteractivity() {
+  const slider = document.getElementById('chartSlider');
+  const overlay = document.getElementById('chartSliderOverlay');
+  const leftHandle = slider.querySelector('.slider-handle.left');
+  const rightHandle = slider.querySelector('.slider-handle.right');
+  const counter = slider.querySelector('.slider-counter');
 
-    function onUp() {
-      dragging = false;
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    }
+  if (!slider || !overlay) return;
 
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
+  let isDragging = false;
+  let resizing = null;
+  let dragStartX = 0;
+  let initialLeft = 0;
+  let initialWidth = 0;
+
+  slider.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('slider-handle')) return;
+    isDragging = true;
+    dragStartX = e.clientX;
+    initialLeft = slider.offsetLeft;
+    slider.style.cursor = 'grabbing';
   });
+
+  leftHandle.addEventListener('mousedown', (e) => {
+    resizing = 'left';
+    dragStartX = e.clientX;
+    initialLeft = slider.offsetLeft;
+    initialWidth = slider.offsetWidth;
+    e.stopPropagation();
+  });
+
+  rightHandle.addEventListener('mousedown', (e) => {
+    resizing = 'right';
+    dragStartX = e.clientX;
+    initialLeft = slider.offsetLeft;
+    initialWidth = slider.offsetWidth;
+    e.stopPropagation();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    const deltaX = e.clientX - dragStartX;
+
+    if (isDragging) {
+      const newLeft = Math.max(0, Math.min(initialLeft + deltaX, overlay.offsetWidth - slider.offsetWidth));
+      slider.style.left = `${newLeft}px`;
+      updateSliderScope(newLeft, slider.offsetWidth);
+    }
+
+    if (resizing === 'left') {
+      const newLeft = Math.max(0, initialLeft + deltaX);
+      const newWidth = Math.max(20, initialWidth - deltaX);
+      slider.style.left = `${newLeft}px`;
+      slider.style.width = `${newWidth}px`;
+      updateSliderScope(newLeft, newWidth);
+    }
+
+    if (resizing === 'right') {
+      const newWidth = Math.max(20, initialWidth + deltaX);
+      slider.style.width = `${newWidth}px`;
+      updateSliderScope(initialLeft, newWidth);
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    resizing = null;
+    slider.style.cursor = 'grab';
+  });
+
+  // Initialize counter if needed
+  if (!counter) {
+    const label = document.createElement('div');
+    label.className = 'slider-counter';
+    label.textContent = `${sliderEnd - sliderStart}d`;
+    slider.appendChild(label);
+  }
 }
