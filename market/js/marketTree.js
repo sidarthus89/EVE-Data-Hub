@@ -61,8 +61,8 @@ export function getGroupIcon(groupID, groupNode) {
     }
 
     return iconFile
-        ? `/market/icons/items/${iconFile}`
-        : '/market/icons/default.png';
+        ? `/market/Icons/${iconFile}`
+        : '/market/Icons/default.png';
 }
 
 export function renderGroup(groupName, groupObject, parentElement) {
@@ -141,7 +141,7 @@ function createMarketItem(item) {
 
     const icon = document.createElement('img');
     icon.className = 'item-icon';
-    icon.src = `/market/icons/types/${item.typeID}.png`;
+    icon.src = `/market/icons/${item.typeID}.png`;
     icon.alt = item.typeName;
     // ← Set fixed size for item icons
     icon.style.width = '16px';

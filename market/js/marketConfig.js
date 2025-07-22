@@ -6,7 +6,7 @@ export const APP_CONFIG = {
     MARKET_FILE: "market/data/market.json",
     LOCATIONS_FILE: "globals/data/locations.json",
     FALLBACK_ICON: "globals/assets/icons/favicon.png",
-    ICON_BASE_URL: "market/icons/types/",
+    ICON_BASE_URL: "market/trimmedIcons/",
     ESI_BASE_URL: "https://esi.evetech.net/latest/markets/",
     DEFAULT_REGION_ID: 10000002,
     SEARCH_MIN_LENGTH: 3
