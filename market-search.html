@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="market/css/marketTicker.css" />
     <link rel="stylesheet" href="market/css/marketSidebar.css" />
     <link rel="stylesheet" href="market/css/itemViewer.css" />
-    <link rel="stylesheet" href="market/css/marketTables.css" />
+    <link rel="stylesheet" href="market/css/marketOrders.css" />
     <link rel="stylesheet" href="market/css/marketHistory.css" />
     <link rel="icon" type="image/png" href="globals/assets/icons/favicon.png" />
 </head>
@@ -59,8 +59,8 @@
 
                             <!-- 🔗 Market Links -->
                             <div class="market-tabs">
-                                <a id="viewMarketLink" href="#" class="market-tabs active">Market Orders</a>
-                                <a id="viewHistoryLink" href="#" class="market-tabs">Price History</a>
+                                <a id="viewMarketLink" href="#" class="market-link active">Market Orders</a>
+                                <a id="viewHistoryLink" href="#" class="market-link">Price History</a>
                                 <div class="tab-underline"></div>
                             </div>
                         </div>
@@ -77,11 +77,18 @@
                             <table id="sellersTable" class="market-table">
                                 <thead>
                                     <tr>
+                                        <th class="resizable" data-sort="range">Range<div class="resizer"></div>
+                                        </th>
                                         <th class="resizable" data-sort="quantity">Quantity<div class="resizer"></div>
                                         </th>
                                         <th class="resizable" data-sort="price">Price<div class="resizer"></div>
                                         </th>
-                                        <th class="resizable" data-sort="location">Location<div class="resizer"></div>
+                                        <th class="resizable" data-sort="region">Region<div class="resizer"></div>
+                                        </th>
+                                        <th class="resizable" data-sort="security">Sec.<div class="resizer"></div>
+                                        </th>
+                                        <th class="resizable" data-sort="location">Location<div class="resizer">
+                                            </div>
                                         </th>
                                         <th class="resizable" data-sort="expires">Expires in<div class="resizer"></div>
                                         </th>
@@ -106,16 +113,20 @@
                             <table id="buyersTable" class="market-table">
                                 <thead>
                                     <tr>
+                                        <th class="resizable" data-sort="minVolume">Min Volume<div class="resizer">
+                                            </div>
                                         <th class="resizable" data-sort="quantity">Quantity<div class="resizer"></div>
                                         </th>
                                         <th class="resizable" data-sort="price">Price<div class="resizer"></div>
+                                        <th class="resizable" data-sort="region">Region<div class="resizer"></div>
                                         </th>
-                                        <th class="resizable" data-sort="range">Range (jumps)<div class="resizer"></div>
+                                        <th class="resizable" data-sort="security">Sec.<div class="resizer"></div>
+                                        </th>
                                         </th>
                                         <th class="resizable" data-sort="location">Location<div class="resizer"></div>
                                         </th>
-                                        <th class="resizable" data-sort="minVolume">Min Volume<div class="resizer">
-                                            </div>
+                                        <th class="resizable" data-sort="range">Range<div class="resizer"></div>
+                                        </th>
                                         </th>
                                         <th class="resizable" data-sort="expires">Expires in<div class="resizer"></div>
                                         </th>
@@ -165,8 +176,8 @@
     <script src="/globals/js/loadGlobalNav.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
-    <script type="module" src="market/js/marketMain.js"></script>
-    <script type="module" src="/globals/js/regionSelector.js"></script>
+    <script type="module" src="market/js/marketCore/marketStart.js"></script>
+
 
     <!-- <script src="/EVE-Data-Hub/globals/js/cookieConsent.js" defer></script> -->
 

@@ -1,4 +1,8 @@
 /* ─── Item Viewer Layout ─────── */
+.hidden {
+    display: none !important;
+}
+
 .item-viewer-header {
     display: flex;
     gap: 16px;
@@ -39,6 +43,7 @@
 
 /* ─── Breadcrumb Trail ─────── */
 .item-breadcrumb {
+    border: 1px dashed lime;
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
@@ -133,8 +138,6 @@
     position: absolute;
     bottom: 0;
     height: 2px;
-    width: 100px;
-    /* adjust to fit tab width or match target */
     background: linear-gradient(to right, transparent, #00bfff, transparent);
     border-radius: 2px;
     pointer-events: none;
