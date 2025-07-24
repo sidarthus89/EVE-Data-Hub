@@ -2,6 +2,7 @@
 
 import { setupQuickbarActions } from '../marketLogic/marketSidebarLogic.js';
 
+
 // 📋 Render the Quickbar Panel
 export function renderQuickbar(show) {
 
@@ -24,21 +25,21 @@ export function renderQuickbar(show) {
         headerRow.innerHTML = `
             <div class="qb-action">
                 <button class="qb-btn" title="Export">
-                    <img src="./market/Icons/export.png" alt="Export" />
+                    <img src="./market/icons/base/export.png" alt="Export" />
                 </button>
                 <span class="qb-label">Export</span>
             </div>
 
             <div class="qb-action">
                 <button class="qb-btn" title="Import">
-                    <img src="./market/Icons/import.png" alt="Import" />
+                    <img src="./market/icons/base/import.png" alt="Import" />
                 </button>
                 <span class="qb-label">Import</span>
             </div>
 
             <div class="qb-action">
                 <button class="qb-btn" title="Delete All">
-                    <img src="./market/Icons/delete-all.png" alt="Delete All" />
+                    <img src="./market/icons/base/delete-all.png" alt="Delete All" />
                 </button>
                 <span class="qb-label">Delete All</span>
             </div>

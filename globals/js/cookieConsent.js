@@ -1,3 +1,5 @@
+// cookieConsent.js
+
 document.addEventListener('DOMContentLoaded', () => {
     // Wait a bit or use MutationObserver to ensure injection is done
     const checkBannerInterval = setInterval(() => {

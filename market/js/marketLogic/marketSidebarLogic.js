@@ -1,5 +1,6 @@
-// marketSidebarLogic
+// marketSidebarLogic.js
 // logic for region selector drop down, search box logic, market tree logic/behavior
+import { renderQuickbar } from '../marketUI/marketSidebarUI.js';
 
 // 🛒 Load market categories and items
 export const loadMarket = () =>

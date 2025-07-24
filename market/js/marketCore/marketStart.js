@@ -1,3 +1,5 @@
+//marketStart.js
+
 
 import { APP_CONFIG, appState, elements } from '../marketCore/marketConfig.js';
 import { renderGroup } from '../marketUI/marketTreeUI.js';
@@ -6,6 +8,7 @@ import { handleItemSelection } from '../marketLogic/itemDispatcher.js';
 import { cacheElements } from '../marketCore/marketCache.js';
 import { buildLocationMaps } from '../../../globals/js/locationUtils.js';
 import { loadStaticData } from '../marketLogic/marketSidebarLogic.js';
+import { setHistoryViewActive } from '../marketLogic/marketHistoryLogic.js';
 
 /* Sidebar Imports*/
 import { loadMarket, loadLocations } from '../marketLogic/marketSidebarLogic.js';

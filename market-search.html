@@ -26,7 +26,7 @@
                         <ul id="searchResults" class="search-results"></ul>
                         <button id="clearSearch" style="display:none;">&times;</button>
                         <button id="collapseAllBtn" title="Collapse all groups">
-                            <img src="./market/Icons/collapse.png" alt="Collapse" />
+                            <img src="./market/icons/base/collapse.png" alt="Collapse" />
                         </button>
                     </div>
 
@@ -56,18 +56,19 @@
 
                             <!-- 🔘 Quickbar Button -->
                             <button id="tabMarket" class="quickbar-action">+ Add to Quickbar</button>
-
-                            <!-- 🔗 Market Links -->
-                            <div class="market-tabs">
-                                <a id="viewMarketLink" href="#" class="market-link active">Market Orders</a>
-                                <a id="viewHistoryLink" href="#" class="market-link">Price History</a>
-                                <div class="tab-underline"></div>
-                            </div>
                         </div>
                     </div>
                 </section>
+
+                <div class="market-tabs">
+                    <a id="viewMarketLink" href="#" class="market-link active">Market Orders</a>
+                    <a id="viewHistoryLink" href="#" class="market-link">Price History</a>
+                    <div class="tab-underline"></div>
+                </div>
+
                 <!-- 📊 Live Price Tables -->
                 <section id="itemPriceTables" class="market-view">
+                    <!-- 🔗 Market Links -->
                     <!-- Sellers Section -->
                     <div class="market-section">
                         <h2 class="market-title">
@@ -87,8 +88,9 @@
                                         </th>
                                         <th class="resizable" data-sort="security">Sec.<div class="resizer"></div>
                                         </th>
-                                        <th class="resizable" data-sort="location">Location<div class="resizer">
-                                            </div>
+                                        <th class="resizable location-column" data-sort="location">
+                                            Location
+                                            <div class="resizer"></div>
                                         </th>
                                         <th class="resizable" data-sort="expires">Expires in<div class="resizer"></div>
                                         </th>
@@ -123,7 +125,9 @@
                                         <th class="resizable" data-sort="security">Sec.<div class="resizer"></div>
                                         </th>
                                         </th>
-                                        <th class="resizable" data-sort="location">Location<div class="resizer"></div>
+                                        <th class="resizable location-column" data-sort="location">
+                                            Location
+                                            <div class="resizer"></div>
                                         </th>
                                         <th class="resizable" data-sort="range">Range<div class="resizer"></div>
                                         </th>
@@ -144,24 +148,30 @@
                 <section id="itemHistorySection" class="market-view hidden">
                     <h2 class="market-title">365 Day Price History</h2>
                     <p>Use the slider to change ranges or move along the timeline.</p>
+
                     <div class="history-chart-wrapper">
+                        <!-- Main Price Chart -->
                         <div class="chart-container">
                             <canvas id="historyChart"></canvas>
-                            <div class="chart-slider-wrapper">
-                                <canvas id="chartMiniMap"></canvas>
+                        </div>
 
-                                <div id="chartSliderOverlay">
-                                    <div id="chartSlider" class="slider-range">
-                                        <div class="slider-counter">30d</div>
-                                        <div class="slider-handle left"></div>
-                                        <div class="slider-window"></div>
-                                        <div class="slider-handle right"></div>
-                                    </div>
+                        <!-- Navigator with Slider -->
+                        <div class="chart-slider-wrapper">
+                            <canvas id="historyNavigatorChart" height="60"></canvas>
+
+                            <!-- Slider Overlay (goes on top of navigator) -->
+                            <div id="chartSliderOverlay">
+                                <div id="chartSlider" class="slider-range">
+                                    <div class="slider-counter">30d</div>
+                                    <div class="slider-handle left"></div>
+                                    <div class="slider-window"></div>
+                                    <div class="slider-handle right"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
+
             </div>
 
             <div class="marquee" id="plexTicker">

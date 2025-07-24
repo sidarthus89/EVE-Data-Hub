@@ -2,11 +2,12 @@
 
 import { appState } from '../marketCore/marketConfig.js';
 import { handleItemSelection } from '../marketLogic/itemDispatcher.js';
-import { addToQuickbar } from '../marketLogic/marketSidebarLogic.js';
-import { buildFlatItemList } from '../marketLogic/marketTreeLogic.js';
 import { getGroupIcon, getIconPath } from '../marketUI/marketFormatting.js';
+import { addToQuickbar } from '../marketLogic/marketSidebarLogic.js';
 
-function createMarketItem(item) {
+function createMarketItem(item, groupName = '') {
+    console.log('[🧩 createMarketItem] Received item:', item);
+
     const li = document.createElement('li');
     li.className = 'market-item';
     li.dataset.typeId = item.typeID;
@@ -19,7 +20,12 @@ function createMarketItem(item) {
     icon.style.height = '16px';
 
     const label = document.createElement('span');
-    label.textContent = item.typeName?.trim();
+    const typeName = item.typeName?.trim();
+    const labelText = (groupName && typeName.startsWith(groupName + ' '))
+        ? typeName.slice(groupName.length + 1)
+        : typeName;
+    label.textContent = labelText;
+
 
     const addBtn = document.createElement('button');
     addBtn.textContent = '+';
@@ -125,11 +131,13 @@ export function renderGroup(groupName, groupObject, parentElement) {
 
     const iconImg = document.createElement('img');
     iconImg.className = 'group-icon';
-    iconImg.src = getGroupIcon(groupObject);
+    iconImg.src = getGroupIcon(groupObject._info?.marketGroupID, groupObject);
+
 
     const labelSpan = document.createElement('span');
     labelSpan.className = 'group-label';
     labelSpan.textContent = groupName;
+
 
     headerDiv.append(arrowSpan, iconImg, labelSpan);
     groupLi.appendChild(headerDiv);
@@ -165,8 +173,9 @@ export function createSubMenu(groupObject) {
 
         if (Array.isArray(value)) {
             value.forEach(item => {
-                subList.appendChild(createMarketItem(item));
+                subList.appendChild(createMarketItem(item, key));
             });
+
         } else if (typeof value === 'object') {
             renderGroup(key, value, subList);
         }

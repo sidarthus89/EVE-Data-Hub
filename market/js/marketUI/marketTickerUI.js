@@ -11,10 +11,11 @@ export async function renderTicker() {
     const stats = await getPLEXTickerStats();
 
     const baseContent = [
-        { label: 'Highest Buy', value: stats.highestBuy, class: 'highest' },
-        { label: 'Average', value: stats.averagePrice, class: 'average' },
-        { label: 'Lowest Sell', value: stats.lowestSell, class: 'lowest' }
+        { label: 'Highest Buy', value: stats.highestBuy, class: 'highest' },  // 🔴
+        { label: 'Lowest Sell', value: stats.lowestSell, class: 'lowest' },   // 🟢
+        { label: 'Average', value: stats.averagePrice, class: 'average' }     // 🟡
     ];
+
 
     container.innerHTML = '';
 

@@ -1,4 +1,5 @@
 // 📋 marketOrdersUI.js
+
 import { appState } from '../marketCore/marketConfig.js';
 import { formatISK, formatExpires } from '../marketUI/marketFormatting.js';
 
@@ -59,10 +60,22 @@ export function renderMarketTable(tableId, orders) {
 
     const rows = orders.map(order => {
         const loc = appState.stationMap?.[order.location_id];
-        const region = loc?.region ?? 'Unknown';
-        const system = loc?.system ?? '';
+        const region = loc?.regionName ?? 'Unknown';
+        const system = loc?.systemName ?? '';
         const station = loc?.stationName ?? `Station ${order.location_id}`;
-        const secRaw = typeof loc?.security === 'number' ? loc.security : null;
+
+        // Security comes from the system data in your locations.json
+        // We need to look it up from the original locations data since it's not stored in stationMap
+        let secRaw = null;
+        if (loc && appState.locationsData) {
+            const regionData = appState.locationsData[loc.regionName];
+            const systemData = regionData?.[loc.systemName];
+            if (systemData && typeof systemData.security === 'number') {
+                secRaw = systemData.security;
+            }
+        }
+
+
         const secRounded = secRaw !== null ? Math.round(secRaw * 10) / 10 : 'N/A';
         const secColor = typeof secRounded === 'number' ? getSecColor(secRounded) : '#999';
 
@@ -94,9 +107,6 @@ export function renderMarketTable(tableId, orders) {
 
     tbody.innerHTML = rows.join('');
 }
-
-
-
 
 // 🔁 Pagination
 export function renderPagination(containerId, orders, currentPage, tableId) {
@@ -194,9 +204,22 @@ export function sortTableByColumn(tableId, colIndex, isNumeric, ascending) {
     tbody.innerHTML = '';
     rows.forEach(row => tbody.appendChild(row));
 
-    table.querySelectorAll('th').forEach((th, i) => {
-        th.classList.remove('sort-asc', 'sort-desc');
-        if (i === colIndex) th.classList.add(ascending ? 'sort-asc' : 'sort-desc');
+    table.querySelectorAll('th.resizable').forEach(th => {
+        if (!th.querySelector('.resizer')) {
+            const span = document.createElement('span');
+            span.className = 'resizer';
+            span.style.cssText = `
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 6px;
+            height: 100%;
+            cursor: col-resize;
+            user-select: none;
+        `;
+            th.style.position = 'relative'; // Needed for span to position correctly
+            th.appendChild(span);
+        }
     });
 }
 
@@ -208,22 +231,47 @@ function extractValue(row, index) {
 
 // 🪄 Header Resizing
 export function makeTableHeadersResizable(table) {
-    table.querySelectorAll('th.resizable').forEach(th => {
-        const resizer = th.querySelector('.resizer');
-        if (!resizer) return;
+    const MIN_WIDTH = 40;
 
-        let startX, startWidth;
-        resizer.onmousedown = e => {
+    table.querySelectorAll('th.resizable').forEach(th => {
+        // Inject resizer span if not present
+        if (!th.querySelector('.resizer')) {
+            const resizer = document.createElement('span');
+            resizer.className = 'resizer';
+            resizer.style.cssText = `
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 6px;
+                height: 100%;
+                cursor: col-resize;
+                user-select: none;
+                z-index: 1;
+            `;
+            th.style.position = 'relative';
+            th.appendChild(resizer);
+        }
+
+        const resizer = th.querySelector('.resizer');
+        let startX = 0, startWidth = 0;
+
+        resizer.addEventListener('mousedown', e => {
             startX = e.pageX;
             startWidth = th.offsetWidth;
-            document.onmousemove = e => {
-                const width = Math.max(startWidth + (e.pageX - startX), 40);
-                th.style.width = `${width}px`;
+
+            const onMouseMove = e => {
+                const newWidth = Math.max(startWidth + (e.pageX - startX), MIN_WIDTH);
+                th.style.width = `${newWidth}px`;
             };
-            document.onmouseup = () => {
-                document.onmousemove = null;
-                document.onmouseup = null;
+
+            const onMouseUp = () => {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
             };
-        };
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
     });
 }
+

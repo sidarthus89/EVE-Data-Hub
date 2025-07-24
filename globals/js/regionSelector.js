@@ -1,3 +1,5 @@
+//regionSelector.js
+
 import { appState, APP_CONFIG, elements } from '../../market/js/marketCore/marketConfig.js';
 import { fetchMarketOrders } from '../../globals/js/esiAPI.js';
 import { fetchMarketHistory, setHistoryViewActive } from '../../market/js/marketLogic/marketHistoryLogic.js';

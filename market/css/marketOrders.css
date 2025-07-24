@@ -70,6 +70,11 @@
     color: #ccc;
 }
 
+th.resizable {
+    white-space: nowrap;
+    width: auto;
+}
+
 th .resizer:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
@@ -80,4 +85,25 @@ th.resizable[draggable="true"] {
 
 th.resizable[draggable="true"]:active {
     cursor: grabbing;
+}
+
+th.location-column {
+    width: 280px;
+    min-width: 240px;
+    max-width: 300px;
+}
+
+th.resizable .resizer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 6px;
+    height: 100%;
+    cursor: col-resize;
+    background-color: rgba(255, 255, 255, 0.05);
+    z-index: 1;
+}
+
+th.resizable:hover .resizer {
+    background-color: rgba(255, 255, 255, 0.2);
 }

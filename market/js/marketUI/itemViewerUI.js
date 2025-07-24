@@ -1,4 +1,4 @@
-// 📦 itemViewer.js
+// 📦 itemViewerUI.js
 // Renders item viewer: item name, icon, and breadcrumb trail above market orders and history.
 
 /* ───── MODULE IMPORTS ───── */

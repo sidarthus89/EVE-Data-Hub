@@ -6,6 +6,18 @@ import { APP_CONFIG, appState } from '../../market/js/marketCore/marketConfig.js
 // ✅ Safe endpoint builder to avoid premature access
 const ESI_ENDPOINTS = getESIEndpoints();
 
+export const GLOBAL_PLEX_REGION_ID = 19000001;
+
+export async function fetchGlobalPLEXOrders(typeID) {
+    if (!typeID) {
+        console.warn(`[⚠️ API] Missing typeID for global PLEX fetch`);
+        return [];
+    }
+    return await fetchRegionOrders(typeID, GLOBAL_PLEX_REGION_ID);
+}
+
+
+
 export function getESIEndpoints() {
     const base = APP_CONFIG.ESI_BASE_URL;
     return {

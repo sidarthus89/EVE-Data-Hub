@@ -1,4 +1,4 @@
-// 📦 marketOrders.js
+// 📦 marketOrdersLogic.js
 // Fetches and organizes EVE market orders by region/type. Acts as a higher-level interface over esiAPI.js.
 
 import { appState, APP_CONFIG } from '../marketCore/marketConfig.js';

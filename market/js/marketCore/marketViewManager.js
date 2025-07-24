@@ -33,7 +33,7 @@ export function toggleSidebarView() {
         quickbarTab.classList.add('active');
         marketTab.classList.remove('active');
 
-        menuList.style.display = 'none';
+        menuList.style.display = 'none'; s
         quickbarList.style.display = 'block';
 
         renderQuickbar(true); // Re-render on tab switch
@@ -41,11 +41,14 @@ export function toggleSidebarView() {
 }
 
 export function toggleMarketView() {
+    const marketPanel = document.getElementById('itemPriceTables');
+    const historyPanel = document.getElementById('itemHistorySection');
+
     if (appState.activeView === 'market') {
-        elements.marketTables?.classList.remove("hidden");
-        elements.historyChart?.classList.add("hidden");
+        marketPanel?.classList.remove("hidden");
+        historyPanel?.classList.add("hidden");
     } else if (appState.activeView === 'history') {
-        elements.marketTables?.classList.add("hidden");
-        elements.historyChart?.classList.remove("hidden");
+        marketPanel?.classList.add("hidden");
+        historyPanel?.classList.remove("hidden");
     }
 }

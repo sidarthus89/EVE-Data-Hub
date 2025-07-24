@@ -1,4 +1,4 @@
-// 🎨 itemViewerUI.js
+// 🎨 itemViewerLogic.js
 // Renders the item viewer interface: icon, name, breadcrumb trail
 
 import { elements } from '../marketCore/marketConfig.js';

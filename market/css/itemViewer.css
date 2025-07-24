@@ -43,7 +43,6 @@
 
 /* ─── Breadcrumb Trail ─────── */
 .item-breadcrumb {
-    border: 1px dashed lime;
     display: flex;
     flex-wrap: wrap;
     gap: 6px;

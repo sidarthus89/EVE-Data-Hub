@@ -92,6 +92,7 @@
 
 /* ── Search Results ───────────── */
 #searchResults {
+    padding-left: 0px;
     position: absolute;
     top: calc(100% + 4px);
     left: 0;
@@ -103,10 +104,10 @@
     border-radius: 4px;
     overflow-y: auto;
     z-index: 10;
-    display: none;
+    display: block;
 }
 
-#searchResults.visible {
+#searchResults.hidden {
     display: block;
 }
 

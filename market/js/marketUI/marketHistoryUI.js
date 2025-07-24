@@ -1,10 +1,13 @@
+//marketHistoryUI.js
+
 import { appState } from '../marketCore/marketConfig.js';
-import { setHistoryViewActive } from '../marketLogic/marketHistoryLogic.js'; // adjust path if needed
-import { fetchMarketHistory } from '../marketLogic/marketHistoryLogic.js'; // adjust path as needed
+import { setHistoryViewActive, fetchMarketHistory } from '../marketLogic/marketHistoryLogic.js'; // adjust path if needed
+import { renderNavigatorChart } from '../marketUI/historyNavigatorUI.js';
 
 let chartInstance = null;
 let sliderStart = 335;
 let sliderEnd = 365;
+let renderChart = () => { }; // 👈 initialize as empty function
 
 function computeMovingAverage(data, key, period) {
   return data.map((_, i, arr) => {
@@ -42,7 +45,7 @@ export function renderScopedHistoryChart(regionID, typeID) {
     }
   }
 
-  function renderChart() {
+  renderChart = function () {
     const fullHistory = appState.marketHistory?.[typeID];
     if (!fullHistory?.length) {
       console.warn('⚠️ No history data available for:', typeID);
@@ -78,35 +81,38 @@ export function renderScopedHistoryChart(regionID, typeID) {
         data: {
           labels,
           datasets: [
+            // Donchian Channel - highs (fill to lows)
+            {
+              type: 'line',
+              label: 'Highs for Channel',
+              data: highs,
+              borderColor: 'rgba(0,0,0,0)',
+              backgroundColor: 'rgba(128,128,128,0.15)',
+              pointRadius: 0,
+              fill: '-1',
+              yAxisID: 'y'
+            },
+            {
+              type: 'line',
+              label: 'Lows for Channel',
+              data: lows,
+              borderColor: 'rgba(0,0,0,0)',
+              pointRadius: 0,
+              fill: false,
+              yAxisID: 'y'
+            },
+
+            // Price and Moving Averages
             {
               type: 'line',
               label: 'Median Daily Price',
               data: medians,
               borderColor: '#ffcc33',
+              backgroundColor: '#ffcc33',
               pointRadius: 2,
+              pointHoverRadius: 3,
               fill: false,
-              yAxisID: 'y'
-            },
-            {
-              type: 'line',
-              label: 'Min Price',
-              data: lows,
-              borderColor: '#999',
-              borderDash: [4, 2],
-              fill: false,
-              pointRadius: 0,
-              tension: 0.2,
-              yAxisID: 'y'
-            },
-            {
-              type: 'line',
-              label: 'Max Price',
-              data: highs,
-              borderColor: '#999',
-              borderDash: [4, 2],
-              fill: false,
-              pointRadius: 0,
-              tension: 0.2,
+              tension: 0.3,
               yAxisID: 'y'
             },
             {
@@ -114,6 +120,7 @@ export function renderScopedHistoryChart(regionID, typeID) {
               label: '5-Day MA',
               data: ma5,
               borderColor: '#66ccff',
+              borderWidth: 1.5,
               fill: false,
               pointRadius: 0,
               tension: 0.3,
@@ -124,16 +131,21 @@ export function renderScopedHistoryChart(regionID, typeID) {
               label: '20-Day MA',
               data: ma20,
               borderColor: '#ff6633',
+              borderWidth: 1.5,
               fill: false,
               pointRadius: 0,
               tension: 0.3,
               yAxisID: 'y'
             },
+
+            // Volume
             {
               type: 'bar',
               label: 'Volume',
               data: volumes,
-              backgroundColor: 'rgba(0,255,153,0.3)',
+              backgroundColor: 'rgba(0, 180, 150, 0.4)',
+              borderColor: 'rgba(0, 180, 150, 0.8)',
+              borderWidth: 1,
               yAxisID: 'y1'
             }
           ]
@@ -141,35 +153,58 @@ export function renderScopedHistoryChart(regionID, typeID) {
         options: {
           responsive: false,
           maintainAspectRatio: false,
+          animation: false,
           interaction: {
             mode: 'nearest',
             intersect: false
           },
           scales: {
             x: {
-              ticks: { color: '#ccc' },
-              grid: { color: '#222' }
+              ticks: {
+                color: '#bbb',
+                font: { size: 10 }
+              },
+              grid: {
+                color: '#333'
+              }
             },
             y: {
               position: 'left',
-              title: { display: true, text: 'ISK Price', color: '#ccc' },
-              ticks: { color: '#ccc' },
+              title: {
+                display: true,
+                text: 'ISK Price',
+                color: '#bbb'
+              },
+              ticks: { color: '#bbb' },
               grid: { color: '#333' }
             },
             y1: {
               position: 'right',
-              title: { display: true, text: 'Volume', color: '#ccc' },
-              ticks: { color: '#ccc' },
+              title: {
+                display: true,
+                text: 'Volume',
+                color: '#bbb'
+              },
+              ticks: { color: '#bbb' },
               grid: { drawOnChartArea: false }
             }
           },
           plugins: {
             legend: {
-              labels: { color: '#ccc' }
+              labels: {
+                color: '#bbb',
+                usePointStyle: true,
+                boxWidth: 8
+              }
             },
             tooltip: {
               mode: 'nearest',
-              intersect: false
+              intersect: false,
+              backgroundColor: '#222',
+              titleColor: '#fff',
+              bodyColor: '#ccc',
+              borderColor: '#555',
+              borderWidth: 1
             }
           }
         }
@@ -179,12 +214,16 @@ export function renderScopedHistoryChart(regionID, typeID) {
     }
   }
 
+
   checkAndRender();
+  renderNavigatorChart(typeID);
 }
+
+
 
 export function updateSliderScope(leftPx, widthPx) {
   const overlay = document.getElementById('chartSliderOverlay');
-  const totalDays = 365;
+  const totalDays = 365; // always show 365 days in full chart
   const overlayWidth = overlay.offsetWidth;
   const pxPerDay = overlayWidth / totalDays;
 

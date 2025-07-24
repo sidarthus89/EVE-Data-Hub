@@ -1,7 +1,9 @@
-// 🔍 marketSearch.js
+// 🔍 marketSearchLogic.js
 import { appState, elements, APP_CONFIG } from '../marketCore/marketConfig.js';
 import { handleItemSelection } from './itemDispatcher.js';
 import { regionSelector } from '../../../globals/js/regionSelector.js';
+import { renderSearchResults, hideSearchResults } from '../marketUI/marketSearchUI.js';
+
 
 const MIN_LENGTH = APP_CONFIG.SEARCH_MIN_LENGTH || 3;
 const MAX_RESULTS = APP_CONFIG.MAX_SEARCH_RESULTS || 25;
@@ -13,6 +15,37 @@ function debounce(fn, delay) {
         clearTimeout(timer);
         timer = setTimeout(() => fn.apply(this, args), delay);
     };
+}
+
+export function buildFlatItemList(menuData) {
+
+    appState.flatItemList = [];
+
+    function scan(node) {
+        if (!node) return;
+        if (Array.isArray(node)) {
+            node.forEach(scan);
+        } else if (isValidItem(node)) {
+            appState.flatItemList.push({
+                name: node.typeName.trim(),
+                type_id: node.typeID
+            });
+        } else if (typeof node === 'object') {
+            Object.entries(node).forEach(([key, value]) => {
+                if (key !== '_info') scan(value);
+            });
+        }
+    }
+
+    function isValidItem(obj) {
+        return (
+            typeof obj?.typeName === 'string' &&
+            obj?.published === true &&
+            (typeof obj.typeID === 'number' || /^\d+$/.test(obj.typeID))
+        );
+    }
+
+    scan(menuData);
 }
 
 // 🚀 Initialize Search Behavior

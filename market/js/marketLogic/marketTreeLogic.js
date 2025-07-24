@@ -1,37 +1,11 @@
+//marketTreeLogic.js
+
 import { appState, elements } from '../marketCore/marketConfig.js';
 import { handleItemSelection } from '../marketLogic/itemDispatcher.js';
 import { addToQuickbar } from '../marketLogic/marketSidebarLogic.js';
 import { renderGroup } from '../marketUI/marketTreeUI.js';
+import { buildFlatItemList } from '../marketLogic/marketSearchLogic.js';
 
-export function buildFlatItemList(menuData) {
-    appState.flatItemList = [];
-
-    function scan(node) {
-        if (!node) return;
-        if (Array.isArray(node)) {
-            node.forEach(scan);
-        } else if (isValidItem(node)) {
-            appState.flatItemList.push({
-                name: node.typeName.trim(),
-                type_id: node.typeID
-            });
-        } else if (typeof node === 'object') {
-            Object.entries(node).forEach(([key, value]) => {
-                if (key !== '_info') scan(value);
-            });
-        }
-    }
-
-    function isValidItem(obj) {
-        return (
-            typeof obj?.typeName === 'string' &&
-            obj?.published === true &&
-            (typeof obj.typeID === 'number' || /^\d+$/.test(obj.typeID))
-        );
-    }
-
-    scan(menuData);
-}
 
 export function findGroupObjectByLabel(label, node = appState.market) {
     for (const [key, value] of Object.entries(node)) {
@@ -64,8 +38,8 @@ export function getGroupIcon(groupID, groupNode) {
     }
 
     return iconFile
-        ? `/market/icons/${iconFile}`
-        : '/market/icons/default.png';
+        ? `/market/icons/base/${iconFile}`
+        : '/market/icons/base/default.png';
 }
 
 // 🌲 Initialize Menu from Market Data

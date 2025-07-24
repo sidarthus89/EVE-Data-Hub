@@ -1,7 +1,9 @@
 //marketSearchUI.js
+import { APP_CONFIG } from '../marketCore/marketConfig.js';
+const MAX_RESULTS = APP_CONFIG.MAX_RESULTS || 100;
 
 // 🔎 Render Search Results
-function renderSearchResults(query) {
+export function renderSearchResults(query) {
     const results = elements.searchResults;
     results.innerHTML = '';
 
@@ -37,7 +39,7 @@ function renderSearchResults(query) {
 }
 
 // 🧹 Hide Suggestion List
-function hideSearchResults() {
+export function hideSearchResults() {
     const results = elements.searchResults;
     results.innerHTML = '';
     results.classList.add('hidden');
