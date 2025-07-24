@@ -83,7 +83,8 @@ export function renderQuickbar(show) {
 
                 const label = document.createElement("span");
                 label.textContent = item.name;
-                label.addEventListener("click", () => selectItem(item.type_id));
+                label.addEventListener("click", () => selectItem(item));
+
 
                 li.append(removeBtn, label);
                 quickbarEl.appendChild(li);

@@ -40,22 +40,26 @@ export function setupQuickbarActions() {
     });
 }
 
-
 export function addToQuickbar(item) {
     if (!item?.typeID || !item?.typeName) return;
 
-    const exists = (appState.quickbarItems || []).some(q => q.type_id === item.typeID);
+    const exists = appState.quickbarItems?.some(q => q.type_id === item.typeID);
     if (exists) return;
 
+    // Clone the original tree node entry (could include groupID, categoryID, etc.)
     const newEntry = {
         type_id: item.typeID,
-        name: item.typeName
+        typeName: item.typeName,
+        groupID: item.groupID ?? null,
+        categoryID: item.categoryID ?? null
+        // Add any other props your table/history logic relies on
     };
 
     appState.quickbarItems = [...(appState.quickbarItems || []), newEntry];
     localStorage.setItem("quickbarItems", JSON.stringify(appState.quickbarItems));
     renderQuickbar(true);
 }
+
 
 // ✅ Static JSON loader with optional hydrator
 export async function loadStaticData(filename, targetKey, hydrateFn = null) {

@@ -33,7 +33,7 @@ export function toggleSidebarView() {
         quickbarTab.classList.add('active');
         marketTab.classList.remove('active');
 
-        menuList.style.display = 'none'; s
+        menuList.style.display = 'none';
         quickbarList.style.display = 'block';
 
         renderQuickbar(true); // Re-render on tab switch
