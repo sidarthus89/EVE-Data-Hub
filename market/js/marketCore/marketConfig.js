@@ -1,8 +1,11 @@
 // 📦 marketConfig.js
 // Provides constants, shared state, and DOM references for the market module
 
+
+const isGitHubPages = window.location.hostname === "sidarthus89.github.io";
+
 export const APP_CONFIG = {
-    DATA_PATH: "/",
+    DATA_PATH: isGitHubPages ? "/EVE-Data-Hub/" : "/",
     MARKET_FILE: "market/data/market.json",
     LOCATIONS_FILE: "globals/data/locations.json",
     FALLBACK_ICON: "market/assets/default.png",
