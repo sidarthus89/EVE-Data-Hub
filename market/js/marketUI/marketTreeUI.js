@@ -6,8 +6,6 @@ import { getGroupIcon, getIconPath } from '../marketUI/marketFormatting.js';
 import { addToQuickbar } from '../marketLogic/marketSidebarLogic.js';
 
 function createMarketItem(item, groupName = '') {
-    console.log('[🧩 createMarketItem] Received item:', item);
-
     const li = document.createElement('li');
     li.className = 'market-item';
     li.dataset.typeId = item.typeID;

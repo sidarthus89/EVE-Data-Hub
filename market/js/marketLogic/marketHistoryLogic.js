@@ -23,7 +23,6 @@ export function setHistoryViewActive(isActive) {
     const canvas = getChartCanvas();
     if (canvas) {
         const rect = canvas.getBoundingClientRect();
-        console.log('📊 Chart canvas dimensions:', rect.width, 'x', rect.height);
     } else {
         console.warn('[⚠️ Chart] No canvas element found');
     }
@@ -45,17 +44,14 @@ export async function fetchMarketHistory(typeID, selectedRegion) {
     // Check if we already have this data cached
     if (appState.marketHistory?.[typeID] && appState.historyCache?.[cacheKey]) {
         const cacheAge = Date.now() - appState.historyCache[cacheKey].timestamp;
-        const MAX_CACHE_AGE = 5 * 60 * 1000; // 5 minutes
+        const MAX_CACHE_AGE = 5 * 60 * 1000;
 
         if (cacheAge < MAX_CACHE_AGE) {
-            console.log('📊 Using cached history data for', typeID);
             return appState.marketHistory[typeID];
         }
     }
 
     try {
-        console.log('🔄 Fetching market history from ESI...', { typeID, regionID });
-
         // Use your existing ESI API function
         const rawHistory = await fetchItemPriceHistory(typeID, regionID);
 
@@ -79,13 +75,9 @@ export async function fetchMarketHistory(typeID, selectedRegion) {
             regionID,
             recordCount: processedHistory.length
         };
-
-        console.log(`✅ Cached ${processedHistory.length} history records for typeID ${typeID}`);
         return appState.marketHistory[typeID];
 
     } catch (error) {
-        console.error(`❌ History fetch failed for ${typeID}:`, error);
-
         // Maintain your existing error handling
         appState.marketHistory ??= {};
         appState.marketHistory[typeID] = [];
@@ -215,11 +207,9 @@ export function clearHistoryCache(typeID = null) {
                 }
             });
         }
-        console.log(`🗑️ Cleared history cache for typeID ${typeID}`);
     } else {
         appState.marketHistory = {};
         appState.historyCache = {};
-        console.log('🗑️ Cleared all history cache');
     }
 }
 
@@ -235,16 +225,12 @@ export async function preloadHistoryData(typeIDs, regionID) {
         return { success: 0, failed: 0 };
     }
 
-    console.log(`🔄 Preloading history for ${typeIDs.length} items...`);
-
     const results = await Promise.allSettled(
         typeIDs.map(typeID => fetchMarketHistory(typeID, regionID))
     );
 
     const success = results.filter(r => r.status === 'fulfilled').length;
     const failed = results.filter(r => r.status === 'rejected').length;
-
-    console.log(`✅ Preload complete: ${success} success, ${failed} failed`);
 
     return { success, failed, total: typeIDs.length };
 }

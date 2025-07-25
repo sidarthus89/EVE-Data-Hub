@@ -64,8 +64,6 @@ export function renderQuickbar(show) {
             quickbarEl.innerHTML = `<li style='padding: 6px 10px; color: #999;'>Your quickbar is empty.</li>`;
         } else {
             items.forEach(item => {
-                console.log('[🧩 Rendering Quickbar]', item.type_id, item.name);
-
                 const li = document.createElement("li");
                 li.className = "market-item";
                 li.dataset.typeId = item.type_id;

@@ -28,7 +28,6 @@ import { renderHistoryView, renderScopedHistoryChart } from '../marketUI/marketH
 
 export async function initializeMarketData() {
     try {
-        console.log("🧊 Initializing static market & location data...");
         await Promise.all([
             loadLocations(),                        // e.g., appState.regionMap
             loadStaticData(APP_CONFIG.MARKET_FILE, 'market') // sets appState.market
@@ -37,8 +36,6 @@ export async function initializeMarketData() {
         if (!appState.market || typeof appState.market !== 'object') {
             throw new Error("❌ appState.market is missing or malformed");
         }
-
-        console.log("✅ Market data loaded:", Object.keys(appState.market).length, "top-level groups");
 
     } catch (err) {
         console.error("🚨 Failed to initialize market data:", err);
