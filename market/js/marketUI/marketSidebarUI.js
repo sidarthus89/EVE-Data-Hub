@@ -25,21 +25,21 @@ export function renderQuickbar(show) {
         headerRow.innerHTML = `
             <div class="qb-action">
                 <button class="qb-btn" title="Export">
-                    <img src="./market/icons/base/export.png" alt="Export" />
+                    <img src="./market/assets/export.png" alt="Export" />
                 </button>
                 <span class="qb-label">Export</span>
             </div>
 
             <div class="qb-action">
                 <button class="qb-btn" title="Import">
-                    <img src="./market/icons/base/import.png" alt="Import" />
+                    <img src="./market/assets/import.png" alt="Import" />
                 </button>
                 <span class="qb-label">Import</span>
             </div>
 
             <div class="qb-action">
                 <button class="qb-btn" title="Delete All">
-                    <img src="./market/icons/base/delete-all.png" alt="Delete All" />
+                    <img src="./market/assets/delete-all.png" alt="Delete All" />
                 </button>
                 <span class="qb-label">Delete All</span>
             </div>
@@ -81,6 +81,7 @@ export function renderQuickbar(show) {
 
                 const label = document.createElement("span");
                 label.textContent = item.name;
+                label.className = "qb-label";
                 label.addEventListener("click", () => selectItem(item));
 
 

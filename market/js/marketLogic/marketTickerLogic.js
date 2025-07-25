@@ -1,5 +1,4 @@
 // 🧠 marketTickerLogic.js
-import { fetchAllRegionOrders } from '../../../globals/js/esiAPI.js';
 import { formatISK } from '../marketUI/marketFormatting.js'; // adjust path if needed
 import { renderTicker } from '../marketUI/marketTickerUI.js';
 import { fetchGlobalPLEXOrders } from '../../../globals/js/esiAPI.js';
@@ -29,20 +28,17 @@ export async function getPLEXTickerStats() {
     const sellOrders = orders.filter(o => !o.is_buy_order);
 
     const highestBuy = buyOrders.length ? Math.max(...buyOrders.map(o => o.price)) : null;
-    const lowestBuy = buyOrders.length ? Math.min(...buyOrders.map(o => o.price)) : null;
-
-    const highestSell = sellOrders.length ? Math.max(...sellOrders.map(o => o.price)) : null;
     const lowestSell = sellOrders.length ? Math.min(...sellOrders.map(o => o.price)) : null;
-
-    const averagePrice = getAverage([...buyOrders, ...sellOrders]);
+    const averageSell = sellOrders.length ? getAverage(sellOrders) : null;
 
     return {
         name: 'PLEX',
-        highestBuy,     // Max of buy order prices
-        lowestSell,     // Min of sell order prices
-        averagePrice    // Average of ALL order prices (per your spec)
+        highestBuy,     // what buyers are offering (want to pay)
+        lowestSell,     // what sellers are asking (cheapest listing)
+        averageSell     // average of all listings for sale
     };
 }
+
 
 
 

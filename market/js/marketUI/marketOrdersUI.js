@@ -234,44 +234,49 @@ export function makeTableHeadersResizable(table) {
     const MIN_WIDTH = 40;
 
     table.querySelectorAll('th.resizable').forEach(th => {
-        // Inject resizer span if not present
         if (!th.querySelector('.resizer')) {
             const resizer = document.createElement('span');
             resizer.className = 'resizer';
             resizer.style.cssText = `
-                position: absolute;
-                top: 0;
-                right: 0;
-                width: 6px;
-                height: 100%;
-                cursor: col-resize;
-                user-select: none;
-                z-index: 1;
-            `;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 6px;
+        height: 100%;
+        cursor: col-resize;
+        user-select: none;
+        z-index: 1;
+      `;
             th.style.position = 'relative';
             th.appendChild(resizer);
         }
 
         const resizer = th.querySelector('.resizer');
-        let startX = 0, startWidth = 0;
+        let startX = 0;
+        let startWidth = 0;
+        let isResizing = false;
 
         resizer.addEventListener('mousedown', e => {
             startX = e.pageX;
             startWidth = th.offsetWidth;
+            isResizing = true;
 
-            const onMouseMove = e => {
-                const newWidth = Math.max(startWidth + (e.pageX - startX), MIN_WIDTH);
-                th.style.width = `${newWidth}px`;
-            };
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+        });
 
-            const onMouseUp = () => {
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-            };
+        document.addEventListener('mousemove', e => {
+            if (!isResizing) return;
+            const newWidth = Math.max(startWidth + (e.pageX - startX), MIN_WIDTH);
+            th.style.width = `${newWidth}px`;
+        });
 
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+            }
         });
     });
 }
-

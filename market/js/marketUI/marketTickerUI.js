@@ -11,21 +11,20 @@ export async function renderTicker() {
     const stats = await getPLEXTickerStats();
 
     const baseContent = [
-        { label: 'Highest Buy', value: stats.highestBuy, class: 'highest' },  // 🔴
-        { label: 'Lowest Sell', value: stats.lowestSell, class: 'lowest' },   // 🟢
-        { label: 'Average', value: stats.averagePrice, class: 'average' }     // 🟡
+        { label: 'Highest Buy', value: stats.highestBuy, className: 'highest' },
+        { label: 'Lowest Sell', value: stats.lowestSell, className: 'lowest' },
+        { label: 'Average Sell', value: stats.averageSell, className: 'average' }
     ];
-
 
     container.innerHTML = '';
 
     const singleItem = document.createElement('div');
     singleItem.className = 'marquee__item';
 
-    baseContent.forEach(({ label, value, class: cls }) => {
+    baseContent.forEach(({ label, value, className }) => {
         const span = document.createElement('span');
-        span.className = `marquee__text ${cls}`;
-        span.textContent = `${stats.name} — ${label}: ${formatISK(value)} • `;
+        span.className = `marquee__text ${className}`;
+        span.textContent = `PLEX — ${label}: ${formatISK(value)} • `;
         singleItem.appendChild(span);
     });
 

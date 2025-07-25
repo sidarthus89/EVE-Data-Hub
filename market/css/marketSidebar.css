@@ -100,7 +100,6 @@
     width: 100%;
     max-height: 550px;
     background-color: #1c1c1c;
-    border: 1px solid #444;
     border-radius: 4px;
     overflow-y: auto;
     z-index: 10;
@@ -320,7 +319,7 @@ ul.subcategories li {
 .qb-label {
     margin-top: 6px;
     font-size: 11px;
-    color: #aaa;
+    color: #7e7e7e;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

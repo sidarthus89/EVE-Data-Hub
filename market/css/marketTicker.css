@@ -46,17 +46,17 @@ body {
     text-transform: uppercase;
 }
 
-.marquee__text.highest {
+.highest {
     color: #ff4455;
     /* red */
 }
 
-.marquee__text.average {
+.average {
     color: #ffaa00;
     /* yellow */
 }
 
-.marquee__text.lowest {
+.lowest {
     color: #00ff99;
     /* green */
 }
