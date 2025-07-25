@@ -1,7 +1,7 @@
 // loadGlobalNav.js
 
 (function () {
-    const LAYOUT_PATH = '/globals/globalNav.html';
+    const LAYOUT_PATH = 'globals/globalNav.html';
     const LAYOUT_CONTAINER_ID = 'layoutContainer'; // this holds both nav + footer
 
     const layoutTarget = document.getElementById(LAYOUT_CONTAINER_ID);
