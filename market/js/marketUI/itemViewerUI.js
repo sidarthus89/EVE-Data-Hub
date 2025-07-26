@@ -3,8 +3,9 @@
 
 /* ───── MODULE IMPORTS ───── */
 import { appState, elements, APP_CONFIG } from '../marketCore/marketConfig.js';
-import { getIconPath } from './marketFormatting.js';
+import { getEvetechIconURL } from './marketFormatting.js';
 import { expandMarketPath } from './marketTreeUI.js';
+import { addToQuickbar } from '../marketLogic/marketSidebarLogic.js';
 
 /**
  * Mounts the item viewer UI block (icon, name, breadcrumb) for the selected item.
@@ -31,24 +32,46 @@ export function renderItemViewer(itemData, regionID) {
     }
 
     // ⬇️ Update name and icon
-    const iconPath = getIconPath(itemData.iconFile || '');
-    if (elements.itemName) elements.itemName.textContent = itemData.name;
+    const iconPath = getEvetechIconURL(typeID);
 
-    if (elements.itemIcon) {
-        elements.itemIcon.src = iconPath;
-        elements.itemIcon.alt = itemData.name;
-        elements.itemIcon.onerror = () => {
-            console.warn("[ItemViewer] Icon failed to load. Fallback:", APP_CONFIG.FALLBACK_ICON);
-            elements.itemIcon.src = APP_CONFIG.FALLBACK_ICON;
-        };
-    }
 
     // ⬇️ Show viewer sections
     elements.itemViewerHeader?.classList.remove("hidden");
     elements.itemViewerSection?.classList.remove("hidden");
 
     renderBreadcrumbTrail(typeID);
+
+    if (elements.itemIcon) {
+        elements.itemIcon.src = iconPath;
+        elements.itemIcon.alt = itemData.name;
+        elements.itemIcon.style.width = '64px';
+        elements.itemIcon.style.height = '64px';
+
+        elements.itemIcon.onerror = () => {
+            console.warn("[ItemViewer] Icon failed to load. Fallback:", APP_CONFIG.FALLBACK_ICON);
+            elements.itemIcon.src = APP_CONFIG.FALLBACK_ICON;
+        };
+    }
+
+    // ⬇️ Add quickbar button logic
+    const btn = document.getElementById("tabMarket");
+    if (btn) {
+        btn.addEventListener("click", () => {
+            if (appState.selectedItemData) {
+                addToQuickbar(appState.selectedItemData);
+            } else {
+                console.warn("[ItemViewer] No item data in appState.selectedItemData");
+            }
+        });
+    }
 }
+
+document.getElementById("tabMarket")?.addEventListener("click", () => {
+    if (appState.selectedItem) {
+        addToQuickbar(appState.selectedItem);
+    }
+});
+
 
 /**
  * Builds and renders the breadcrumb trail for the selected item path.

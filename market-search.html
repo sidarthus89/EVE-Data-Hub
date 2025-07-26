@@ -17,17 +17,22 @@
     <link rel="icon" type="image/png" href="market/assets/favicon.png" />
 </head>
 
-<body>
+<body class="market-search">
     <main class="content">
         <div class="market-layout">
             <!-- 🧭 Sidebar -->
             <aside id="sidebar">
                 <div id="sidebarHeader">
-                    <select id="regionSelector"></select>
+                    <div class="regionSelector-wrapper">
+                        <select id="regionSelector">
+                            <option value="">Select a region</option>
+                        </select>
+                    </div>
+
                     <div id="searchWrapper">
                         <input type="text" id="searchBox" placeholder="Search items..." autocomplete="on" />
                         <ul id="searchResults" class="search-results"></ul>
-                        <button id="clearSearch" style="display:none;">&times;</button>
+                        <span id="searchClear" class="search-clear" title="Clear Search">&#x2573;</span>
                         <button id="collapseAllBtn" title="Collapse all groups">
                             <img src="/market/assets/collapse.png" alt="Collapse" />
                         </button>
@@ -51,32 +56,35 @@
                         </div>
 
                         <!-- ➡️ Right: Content -->
-                        <div class="viewer-header-right">
-                            <div id="itemViewerContainer" class="item-viewer-container">
-                                <div id="itemBreadcrumb" class="item-breadcrumb"></div>
-                                <div id="itemName" class="item-name"></div>
-                            </div>
+                        <div id="itemViewerContainer" class="item-viewer-container">
+                            <div id="itemBreadcrumb" class="item-breadcrumb"></div>
 
-                            <!-- 🔘 Quickbar Button -->
+                            <!-- ⬇️ Item Name -->
+                            <div id="itemName" class="item-name"></div>
+
+                            <!-- ⬇️ Button below -->
                             <button id="tabMarket" class="quickbar-action">+ Add to Quickbar</button>
                         </div>
+
                     </div>
                 </section>
-
-                <div class="market-tabs">
-                    <a id="viewMarketLink" href="#" class="market-link active">Market Orders</a>
-                    <a id="viewHistoryLink" href="#" class="market-link">Price History</a>
-                    <div class="tab-underline"></div>
-                </div>
 
                 <!-- 📊 Live Price Tables -->
                 <section id="itemPriceTables" class="market-view">
                     <!-- 🔗 Market Links -->
+                    <div class="market-tabs">
+                        <a id="viewMarketLink" href="#" class="market-link active">Market Orders</a>
+                        <a id="viewHistoryLink" href="#" class="market-link">Price History</a>
+                        <div class="tab-underline"></div>
+                    </div>
                     <!-- Sellers Section -->
                     <div class="market-section">
                         <h2 class="market-title">
                             Sellers <span id="sellersCount" class="order-count"></span>
                         </h2>
+                        <div class="table-header">
+                            <div id="sellersPagination" class="pagination"></div>
+                        </div>
                         <div class="market-table-wrapper">
                             <table id="sellersTable" class="market-table">
                                 <thead>
@@ -102,18 +110,17 @@
                                 <tbody></tbody>
                             </table>
                         </div>
-                        <div class="table-footer">
-                            <div id="sellersPagination" class="pagination"></div>
-                        </div>
-                    </div>
 
-                    <hr class="market-divider" />
+                    </div>
 
                     <!-- Buyers Section -->
                     <div class="market-section">
                         <h2 class="market-title">
                             Buyers <span id="buyersCount" class="order-count"></span>
                         </h2>
+                        <div class="table-pagination">
+                            <div id="buyersPagination" class="pagination"></div>
+                        </div>
                         <div class="market-table-wrapper">
                             <table id="buyersTable" class="market-table">
                                 <thead>
@@ -142,9 +149,7 @@
                                 <tbody></tbody>
                             </table>
                         </div>
-                        <div class="table-footer">
-                            <div id="buyersPagination" class="pagination"></div>
-                        </div>
+
                     </div>
                 </section>
                 <!-- 📈 Price History Section -->

@@ -41,24 +41,26 @@ export function setupQuickbarActions() {
 }
 
 export function addToQuickbar(item) {
-    if (!item?.typeID || !item?.typeName) return;
+    const typeID = item.typeID ?? item.type_id;
+    const typeName = item.typeName ?? item.name;
 
-    const exists = appState.quickbarItems?.some(q => q.type_id === item.typeID);
+    if (!typeID || !typeName) return;
+
+    const exists = appState.quickbarItems?.some(q => q.type_id === typeID);
     if (exists) return;
 
-    // Clone the original tree node entry (could include groupID, categoryID, etc.)
     const newEntry = {
-        type_id: item.typeID,
-        typeName: item.typeName,
-        groupID: item.groupID ?? null,
-        categoryID: item.categoryID ?? null
-        // Add any other props your table/history logic relies on
+        type_id: typeID,
+        typeName,
+        groupID: item.groupID ?? item.group_id ?? null,
+        categoryID: item.categoryID ?? item.category_id ?? null
     };
 
     appState.quickbarItems = [...(appState.quickbarItems || []), newEntry];
     localStorage.setItem("quickbarItems", JSON.stringify(appState.quickbarItems));
     renderQuickbar(true);
 }
+
 
 
 // ✅ Static JSON loader with optional hydrator

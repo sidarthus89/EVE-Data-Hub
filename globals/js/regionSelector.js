@@ -12,7 +12,7 @@ export const regionSelector = {
     // 🌟 Popular regions configuration
     popularRegions: {
         enabled: true,
-        title: "Popular Regions",
+        title: "Hubs",
         regions: [] // Will be populated from locations.json
     },
 

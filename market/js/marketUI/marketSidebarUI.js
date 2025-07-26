@@ -1,6 +1,8 @@
 //marketSidebarUI.js
 
 import { setupQuickbarActions } from '../marketLogic/marketSidebarLogic.js';
+import { selectItem } from '../marketCore/marketViewManager.js';
+
 
 
 // 📋 Render the Quickbar Panel
@@ -80,7 +82,7 @@ export function renderQuickbar(show) {
                 });
 
                 const label = document.createElement("span");
-                label.textContent = item.name;
+                label.textContent = item.typeName ?? "Unnamed Item";
                 label.className = "qb-label";
                 label.addEventListener("click", () => selectItem(item));
 
@@ -93,4 +95,19 @@ export function renderQuickbar(show) {
     } else {
         quickbarEl.style.display = "none";
     }
+
+    const searchBox = document.getElementById('searchBox');
+    const clearBtn = document.getElementById('searchClear');
+
+    searchBox.addEventListener('input', () => {
+        clearBtn.style.display = searchBox.value ? 'block' : 'none';
+    });
+
+    clearBtn.addEventListener('click', () => {
+        searchBox.value = '';
+        clearBtn.style.display = 'none';
+
+        // Optional: trigger re-render or reset results
+        // renderQuickbar(true); or clear search results
+    });
 }

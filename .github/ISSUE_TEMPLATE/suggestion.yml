@@ -1,0 +1,17 @@
+name: Submit a Suggestion
+description: Suggest an idea for this project
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: "We appreciate your ideas!"
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's the problem?
+      description: What's missing or could be better?
+  - type: textarea
+    id: solution
+    attributes:
+      label: Your proposed solution

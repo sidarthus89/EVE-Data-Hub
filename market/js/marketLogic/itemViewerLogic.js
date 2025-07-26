@@ -5,28 +5,6 @@ import { elements } from '../marketCore/marketConfig.js';
 import { expandMarketPath } from './marketTree.js';
 
 /**
- * Renders selected item header in viewer
- * @param {Object} viewerData
- */
-export function renderItemViewer(viewerData) {
-    const { itemName, iconPath, fallbackIcon, breadcrumbSegments } = viewerData;
-
-    elements.itemName.textContent = itemName;
-    elements.itemIcon.src = iconPath;
-    elements.itemIcon.alt = itemName;
-
-    elements.itemIcon.onerror = () => {
-        console.warn("[ItemViewerUI] Icon failed to load. Falling back.");
-        elements.itemIcon.src = fallbackIcon;
-    };
-
-    elements.itemViewerHeader?.classList.remove("hidden");
-    elements.itemViewerSection?.classList.remove("hidden");
-
-    renderBreadcrumbTrail(breadcrumbSegments);
-}
-
-/**
  * Builds and mounts breadcrumb trail to DOM
  * @param {string[]} segments
  */

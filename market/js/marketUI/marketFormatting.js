@@ -1,7 +1,7 @@
 // 🛠 marketFormatting.js
 // Provides formatting helpers, UI builders, menu generators, and DOM caching for market module
 
-import { APP_CONFIG, appState, } from '../marketCore/marketConfig.js';
+import { APP_CONFIG } from '../marketCore/marketConfig.js'
 
 // 💱 Formatters
 export function formatExpires(days) {
@@ -9,18 +9,26 @@ export function formatExpires(days) {
 }
 
 // 🎨 Icon Path Generators
-export function getIconPath(iconFile) {
-    return iconFile
-        ? `/${APP_CONFIG.ICON_BASE_URL}${iconFile}`
-        : APP_CONFIG.FALLBACK_ICON;
+export function getEvetechIconURL(typeID, size = 64) {
+    return `https://images.evetech.net/types/${typeID}/icon?size=${size}`;
 }
 
-export function getGroupIcon(groupObject) {
+/**
+ * Returns local file path to a group icon given its marketGroupID
+ * @param {number|string} groupID
+ * @param {object} groupObject
+ * @returns {string}
+ */
+export function getGroupIcon(groupID, groupObject) {
     const iconFile = groupObject?._info?.iconFile;
-    return iconFile
-        ? `/${APP_CONFIG.GROUP_ICON_PATH}${iconFile}`
-        : APP_CONFIG.FALLBACK_ICON;
+
+    if (iconFile && typeof iconFile === 'string') {
+        return `${APP_CONFIG.DATA_PATH}market/assets/groupIcons/${iconFile}`;
+    }
+
+    return APP_CONFIG.FALLBACK_ICON;
 }
+
 
 export function formatISK(value) {
     const safeValue = (typeof value === 'number' && !isNaN(value)) ? value : 0;

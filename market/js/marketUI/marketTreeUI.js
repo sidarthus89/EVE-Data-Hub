@@ -1,70 +1,9 @@
 //marketTreeUI.js
 
 import { appState } from '../marketCore/marketConfig.js';
-import { handleItemSelection } from '../marketLogic/itemDispatcher.js';
-import { getGroupIcon, getIconPath } from '../marketUI/marketFormatting.js';
+import { loadItemView } from '../marketCore/marketDispatcher.js';
+import { getGroupIcon } from '../marketUI/marketFormatting.js';
 import { addToQuickbar } from '../marketLogic/marketSidebarLogic.js';
-
-function createMarketItem(item, groupName = '') {
-    const li = document.createElement('li');
-    li.className = 'market-item';
-    li.dataset.typeId = item.typeID;
-
-    const icon = document.createElement('img');
-    icon.className = 'item-icon';
-    icon.src = `/market/icons/${item.typeID}.png`;
-    icon.alt = item.typeName;
-    icon.style.width = '16px';
-    icon.style.height = '16px';
-
-    const label = document.createElement('span');
-    const typeName = item.typeName?.trim();
-    const labelText = (groupName && typeName.startsWith(groupName + ' '))
-        ? typeName.slice(groupName.length + 1)
-        : typeName;
-    label.textContent = labelText;
-
-
-    const addBtn = document.createElement('button');
-    addBtn.textContent = '+';
-    addBtn.title = 'Add to Quickbar';
-    addBtn.className = 'quickbar-btn';
-
-    addBtn.style.position = 'relative'; // Ensure feedback anchors correctly
-
-    addBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        addToQuickbar(item);
-
-        // 🟢 Visual feedback
-        const indicator = document.createElement('span');
-        indicator.className = 'quickbar-feedback';
-        indicator.textContent = '✔ Added';
-        indicator.style.position = 'absolute';
-        indicator.style.top = '-18px';
-        indicator.style.left = '50%';
-        indicator.style.transform = 'translateX(-50%)';
-        indicator.style.background = '#4CAF50';
-        indicator.style.color = '#fff';
-        indicator.style.padding = '2px 6px';
-        indicator.style.borderRadius = '4px';
-        indicator.style.fontSize = '11px';
-        indicator.style.boxShadow = '0 1px 3px rgba(0,0,0,0.2)';
-        indicator.style.pointerEvents = 'none';
-        indicator.style.zIndex = '100';
-
-        addBtn.appendChild(indicator);
-
-        setTimeout(() => indicator.remove(), 1500);
-    });
-
-    li.append(icon, label, addBtn);
-    li.addEventListener('click', () => {
-        handleItemSelection(item.typeID);
-    });
-
-    return li;
-}
 
 export function expandMarketPath(segmentChain = []) {
     if (!segmentChain.length) return;
@@ -131,6 +70,9 @@ export function renderGroup(groupName, groupObject, parentElement) {
     iconImg.className = 'group-icon';
     iconImg.src = getGroupIcon(groupObject._info?.marketGroupID, groupObject);
 
+    iconImg.onerror = () => {
+        iconImg.src = '/market/assets/default.png';
+    };
 
     const labelSpan = document.createElement('span');
     labelSpan.className = 'group-label';
@@ -163,16 +105,30 @@ export function createSubMenu(groupObject) {
     const subList = document.createElement('ul');
     subList.className = 'subcategories show';
 
+    const preloadQueue = [];
+
     Object.entries(groupObject).forEach(([key, value]) => {
         if (
             key === '_info' ||
             (groupObject._info && groupObject._info.typeName === key)
-        ) return;
+        ) {
+            return;
+        }
 
         if (Array.isArray(value)) {
-            value.forEach(item => {
-                subList.appendChild(createMarketItem(item, key));
-            });
+            const info = groupObject._info;
+            const isRedundant =
+                value.length === 1 &&
+                info &&
+                info.typeID === value[0].typeID &&
+                info.typeName === value[0].typeName;
+
+            if (!isRedundant) {
+                value.forEach(item => {
+                    preloadQueue.push(item.typeID);
+                    subList.appendChild(createMarketItem(item, key));
+                });
+            }
 
         } else if (typeof value === 'object') {
             renderGroup(key, value, subList);
@@ -182,22 +138,56 @@ export function createSubMenu(groupObject) {
     return subList;
 }
 
-function collapseAllGroups() {
-    const allGroups = document.querySelectorAll('#menuList li.collapsible');
+function createMarketItem(item, groupName = '') {
+    const li = document.createElement('li');
+    li.className = 'market-item';
+    li.dataset.typeId = item.typeID;
 
-    allGroups.forEach(group => {
-        group.classList.remove('expanded');
-        group.setAttribute('aria-expanded', 'false');
+    const label = document.createElement('span');
+    const typeName = item.typeName?.trim();
+    const labelText = (groupName && typeName.startsWith(groupName + ' '))
+        ? typeName.slice(groupName.length + 1)
+        : typeName;
+    label.textContent = labelText;
 
-        const arrow = group.querySelector('.group-arrow');
-        if (arrow) arrow.style.transform = 'rotate(0deg)';
 
-        const subList = group._subList || group.querySelector('.subcategories');
-        if (subList) {
-            subList.classList.remove('show');
-            subList.style.display = '';
-        }
+    const addBtn = document.createElement('button');
+    addBtn.textContent = '+';
+    addBtn.title = 'Add to Quickbar';
+    addBtn.className = 'quickbar-btn';
+
+    addBtn.style.position = 'relative';
+
+    addBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        addToQuickbar(item);
+
+        // 🟢 Visual feedback
+        const indicator = document.createElement('span');
+        indicator.className = 'quickbar-feedback';
+        indicator.textContent = '✔ Added';
+        indicator.style.position = 'absolute';
+        indicator.style.top = '-18px';
+        indicator.style.left = '50%';
+        indicator.style.transform = 'translateX(-50%)';
+        indicator.style.background = '#0e1f24';
+        indicator.style.color = '#fff';
+        indicator.style.padding = '2px 6px';
+        indicator.style.borderRadius = '4px';
+        indicator.style.fontSize = '11px';
+        indicator.style.boxShadow = '0 1px 3px rgba(0,0,0,0.2)';
+        indicator.style.pointerEvents = 'none';
+        indicator.style.zIndex = '100';
+
+        addBtn.appendChild(indicator);
+
+        setTimeout(() => indicator.remove(), 1500);
     });
-}
 
-document.getElementById('collapseAllBtn')?.addEventListener('click', collapseAllGroups);
+    li.append(label, addBtn);
+    li.addEventListener('click', () => {
+        loadItemView(item.typeID);
+    });
+
+    return li;
+}

@@ -52,34 +52,3 @@ export async function fetchMarketOrders(typeID, regionRef = 'all') {
     };
 }
 
-/**
- * Filter orders above a minimum volume.
- * @param {Array} orders
- * @param {number} minVolume
- * @returns {Array}
- */
-export function filterByMinimumVolume(orders, minVolume) {
-    return orders.filter(o => o.volume_remain >= minVolume);
-}
-
-/**
- * Sort orders by price.
- * @param {Array} orders
- * @param {boolean} descending
- * @returns {Array}
- */
-export function sortOrdersByPrice(orders, descending = false) {
-    return [...orders].sort((a, b) => descending ? b.price - a.price : a.price - b.price);
-}
-
-/**
- * Paginate a set of orders.
- * @param {Array} orders
- * @param {number} pageSize
- * @param {number} page
- * @returns {Array}
- */
-export function paginateOrders(orders, pageSize = 50, page = 1) {
-    const start = (page - 1) * pageSize;
-    return orders.slice(start, start + pageSize);
-}

@@ -4,7 +4,7 @@
 import { APP_CONFIG, appState, elements } from '../marketCore/marketConfig.js';
 import { renderGroup } from '../marketUI/marketTreeUI.js';
 import { fetchMarketOrders } from '../../../globals/js/esiAPI.js';
-import { handleItemSelection } from '../marketLogic/itemDispatcher.js';
+import { loadItemView } from './marketDispatcher.js';
 import { cacheElements } from '../marketCore/marketCache.js';
 import { buildLocationMaps } from '../../../globals/js/locationUtils.js';
 import { loadStaticData } from '../marketLogic/marketSidebarLogic.js';
@@ -17,6 +17,8 @@ import { regionSelector } from '../../../globals/js/regionSelector.js';
 import { initializeSearch } from '../marketLogic/marketSearchLogic.js';
 import { initializeMarketMenu } from '../marketLogic/marketTreeLogic.js';
 import { toggleSidebarView } from '../marketCore/marketViewManager.js';
+import { addToQuickbar } from '../marketLogic/marketSidebarLogic.js';
+
 
 /* Ticker Imports*/
 import { loadTickerData } from '../marketLogic/marketTickerLogic.js';
@@ -29,8 +31,8 @@ import { renderHistoryView, renderScopedHistoryChart } from '../marketUI/marketH
 export async function initializeMarketData() {
     try {
         await Promise.all([
-            loadLocations(),                        // e.g., appState.regionMap
-            loadStaticData(APP_CONFIG.MARKET_FILE, 'market') // sets appState.market
+            loadLocations(),
+            loadStaticData(APP_CONFIG.MARKET_FILE, 'market')
         ]);
 
         if (!appState.market || typeof appState.market !== 'object') {
@@ -39,13 +41,13 @@ export async function initializeMarketData() {
 
     } catch (err) {
         console.error("🚨 Failed to initialize market data:", err);
-        throw err; // bubble it to the DOMContentLoaded handler
+        throw err;
     }
 }
 
 window.appState = appState;
 window.APP_CONFIG = APP_CONFIG;
-window.handleItemSelection = handleItemSelection;
+window.loadItemView = loadItemView;
 
 document.addEventListener('DOMContentLoaded', async () => {
     appState.activeView = 'market';
@@ -81,7 +83,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         });
 
-        // Position the underline under the default active tab
         requestAnimationFrame(() => {
             const activeTab = document.querySelector('.market-link.active');
             if (activeTab) {

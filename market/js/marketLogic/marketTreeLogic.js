@@ -1,7 +1,7 @@
 //marketTreeLogic.js
 
 import { appState, elements } from '../marketCore/marketConfig.js';
-import { handleItemSelection } from '../marketLogic/itemDispatcher.js';
+import { loadItemView } from '../marketCore/marketDispatcher.js';
 import { addToQuickbar } from '../marketLogic/marketSidebarLogic.js';
 import { renderGroup } from '../marketUI/marketTreeUI.js';
 import { buildFlatItemList } from '../marketLogic/marketSearchLogic.js';
@@ -36,10 +36,6 @@ export function getGroupIcon(groupID, groupNode) {
         }
         iconFile = findIn(appState.marke);
     }
-
-    return iconFile
-        ? `/market/icons/base/${iconFile}`
-        : '/market/icons/base/default.png';
 }
 
 // 🌲 Initialize Menu from Market Data
@@ -61,5 +57,24 @@ export function initializeMarketMenu() {
     });
 }
 
+function collapseAllGroups() {
+    const allGroups = document.querySelectorAll('#menuList li.collapsible');
+
+    allGroups.forEach(group => {
+        group.classList.remove('expanded');
+        group.setAttribute('aria-expanded', 'false');
+
+        const arrow = group.querySelector('.group-arrow');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+
+        const subList = group._subList || group.querySelector('.subcategories');
+        if (subList) {
+            subList.classList.remove('show');
+            subList.style.display = '';
+        }
+    });
+}
+
+document.getElementById('collapseAllBtn')?.addEventListener('click', collapseAllGroups);
 
 

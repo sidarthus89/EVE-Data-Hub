@@ -1,6 +1,6 @@
 // 🔍 marketSearchLogic.js
 import { appState, elements, APP_CONFIG } from '../marketCore/marketConfig.js';
-import { handleItemSelection } from './itemDispatcher.js';
+import { loadItemView } from '../marketCore/marketDispatcher.js';
 import { regionSelector } from '../../../globals/js/regionSelector.js';
 import { renderSearchResults, hideSearchResults } from '../marketUI/marketSearchUI.js';
 
@@ -118,7 +118,7 @@ function handleKeyNavigation(e) {
 // 🧭 Handle Selection Logic
 function onItemSelected(typeID) {
     if (!typeID || isNaN(typeID)) return;
-    handleItemSelection(typeID);
+    loadItemView(typeID);
     drillDownToItem(typeID);
 }
 

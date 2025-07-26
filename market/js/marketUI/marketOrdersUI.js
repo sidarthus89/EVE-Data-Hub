@@ -185,6 +185,9 @@ function reorderTableColumns(tableId, from, to) {
         const movedCell = cells[from];
         row.insertBefore(movedCell, from < to ? cells[to + 1] : cells[to]);
     });
+
+    // Reinitialize drag handles with new indexes
+    enableColumnDrag(tableId);
 }
 
 // 🔢 Sort Table
@@ -204,23 +207,21 @@ export function sortTableByColumn(tableId, colIndex, isNumeric, ascending) {
     tbody.innerHTML = '';
     rows.forEach(row => tbody.appendChild(row));
 
-    table.querySelectorAll('th.resizable').forEach(th => {
-        if (!th.querySelector('.resizer')) {
-            const span = document.createElement('span');
-            span.className = 'resizer';
-            span.style.cssText = `
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 6px;
-            height: 100%;
-            cursor: col-resize;
-            user-select: none;
-        `;
-            th.style.position = 'relative'; // Needed for span to position correctly
-            th.appendChild(span);
-        }
-    });
+    // 👇 Update sort arrow
+    const headers = table.querySelectorAll('th');
+    headers.forEach(th => th.classList.remove('sorted'));
+    const targetHeader = headers[colIndex];
+    targetHeader.classList.add('sorted');
+
+    const existingArrow = targetHeader.querySelector('.sort-arrow');
+    if (existingArrow) existingArrow.remove();
+
+    const arrow = document.createElement('span');
+    arrow.className = 'sort-arrow';
+    arrow.textContent = ascending ? '▲' : '▼';
+    arrow.style.marginLeft = '4px';
+    arrow.style.pointerEvents = 'none';
+    targetHeader.appendChild(arrow);
 }
 
 function extractValue(row, index) {
@@ -232,51 +233,94 @@ function extractValue(row, index) {
 // 🪄 Header Resizing
 export function makeTableHeadersResizable(table) {
     const MIN_WIDTH = 40;
-
     table.querySelectorAll('th.resizable').forEach(th => {
-        if (!th.querySelector('.resizer')) {
-            const resizer = document.createElement('span');
-            resizer.className = 'resizer';
-            resizer.style.cssText = `
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 6px;
-        height: 100%;
-        cursor: col-resize;
-        user-select: none;
-        z-index: 1;
-      `;
-            th.style.position = 'relative';
-            th.appendChild(resizer);
-        }
+        if (th.querySelector('.resizer')) return;
 
-        const resizer = th.querySelector('.resizer');
-        let startX = 0;
-        let startWidth = 0;
-        let isResizing = false;
+        const resizer = document.createElement('span');
+        resizer.className = 'resizer';
+        resizer.style.cssText = `
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 6px;
+            height: 100%;
+            cursor: col-resize;
+            user-select: none;
+            z-index: 2;
+        `;
+        th.style.position = 'relative';
+        th.appendChild(resizer);
+
+        let startX, startWidth;
+        const onMouseMove = e => {
+            const delta = e.pageX - startX;
+            const newWidth = Math.max(startWidth + delta, MIN_WIDTH);
+            th.style.width = `${newWidth}px`;
+        };
+        const onMouseUp = () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        };
 
         resizer.addEventListener('mousedown', e => {
+            e.preventDefault();
             startX = e.pageX;
             startWidth = th.offsetWidth;
-            isResizing = true;
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
 
             document.body.style.cursor = 'col-resize';
             document.body.style.userSelect = 'none';
         });
+    });
+}
 
-        document.addEventListener('mousemove', e => {
-            if (!isResizing) return;
-            const newWidth = Math.max(startWidth + (e.pageX - startX), MIN_WIDTH);
-            th.style.width = `${newWidth}px`;
+// 🧩 Enable Drag & Drop Reordering
+function enableColumnDrag(tableId) {
+    const table = document.getElementById(tableId);
+    const headers = table.querySelectorAll('th');
+
+    headers.forEach((th, index) => {
+        th.draggable = true;
+        th.dataset.index = index;
+        th.style.cursor = 'grab';
+
+        th.addEventListener('dragstart', e => {
+            e.dataTransfer.setData('text/plain', index);
         });
 
-        document.addEventListener('mouseup', () => {
-            if (isResizing) {
-                isResizing = false;
-                document.body.style.cursor = '';
-                document.body.style.userSelect = '';
+        th.addEventListener('dragover', e => e.preventDefault());
+
+        th.addEventListener('drop', e => {
+            e.preventDefault();
+            const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+            const toIndex = parseInt(th.dataset.index, 10);
+            if (!isNaN(fromIndex) && !isNaN(toIndex) && fromIndex !== toIndex) {
+                reorderTableColumns(tableId, fromIndex, toIndex);
             }
+        });
+    });
+}
+
+// 🧪 Initialize All Enhancements on Table
+export function enhanceMarketTable(tableId) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+
+    makeTableHeadersResizable(table);
+    enableColumnDrag(tableId);
+
+    // Optional: Add click-to-sort functionality with toggling direction
+    const headers = table.querySelectorAll('th');
+    headers.forEach((th, i) => {
+        let ascending = true;
+        th.addEventListener('click', () => {
+            const isNumeric = !isNaN(parseFloat(th.textContent));
+            sortTableByColumn(tableId, i, isNumeric, ascending);
+            ascending = !ascending;
         });
     });
 }

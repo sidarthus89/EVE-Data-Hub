@@ -5,10 +5,16 @@
 
 .item-viewer-header {
     display: flex;
+    min-height: 72px;
     gap: 16px;
     align-items: flex-start;
     padding: 10px 0;
     outline: 1px red;
+}
+
+.item-viewer-header.hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .viewer-header-left {
@@ -25,14 +31,25 @@
 .item-viewer-container {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    outline: 1px red;
+    gap: 6px;
+}
+
+/* ─── Item Name + Quickbar Row ─────── */
+.item-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
 }
 
 .item-name {
     font-size: 16px;
     font-weight: bold;
     color: #ddd;
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .viewer-icon {
@@ -65,7 +82,8 @@
 }
 
 /* ─── Quickbar & View Links ─────── */
-#tabMarket {
+#tabMarket,
+.quickbar-action {
     padding: 6px 12px;
     background-color: #222;
     color: #ddd;
@@ -75,13 +93,17 @@
     cursor: pointer;
     width: fit-content;
     margin-bottom: 4px;
+    transition: background-color 0.3s ease;
+    white-space: nowrap;
 }
 
-#tabMarket:hover {
+#tabMarket:hover,
+.quickbar-action:hover {
     background-color: #444;
     color: #fff;
 }
 
+/* ─── Market Tab Links ─────── */
 .market-link {
     position: relative;
     display: inline-block;
@@ -119,7 +141,6 @@
     gap: 16px;
     margin-top: 4px;
 }
-
 
 .market-tabs:visited {
     color: #ccc !important;

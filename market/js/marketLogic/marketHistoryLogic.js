@@ -52,7 +52,6 @@ export async function fetchMarketHistory(typeID, selectedRegion) {
     }
 
     try {
-        // Use your existing ESI API function
         const rawHistory = await fetchItemPriceHistory(typeID, regionID);
 
         if (!rawHistory || rawHistory.length === 0) {
@@ -62,14 +61,13 @@ export async function fetchMarketHistory(typeID, selectedRegion) {
             return [];
         }
 
-        // Process and sort the ESI data
         const processedHistory = processESIHistoryData(rawHistory);
 
         // Cache the processed data (keep your existing structure)
         appState.marketHistory ??= {};
         if (!appState.historyCache) appState.historyCache = {};
 
-        appState.marketHistory[typeID] = processedHistory.slice(-365); // Keep your 365-day limit
+        appState.marketHistory[typeID] = processedHistory.slice(-365);
         appState.historyCache[cacheKey] = {
             timestamp: Date.now(),
             regionID,
@@ -78,7 +76,6 @@ export async function fetchMarketHistory(typeID, selectedRegion) {
         return appState.marketHistory[typeID];
 
     } catch (error) {
-        // Maintain your existing error handling
         appState.marketHistory ??= {};
         appState.marketHistory[typeID] = [];
 
@@ -99,15 +96,6 @@ function processESIHistoryData(rawData) {
 
     return rawData
         .map(entry => {
-            // ESI returns data in this format:
-            // {
-            //   "date": "2024-07-24",
-            //   "average": 6234567.89,
-            //   "highest": 6800000,
-            //   "lowest": 5900000,
-            //   "order_count": 45,
-            //   "volume": 15000
-            // }
 
             if (!entry.date || entry.average === undefined) {
                 console.warn('⚠️ Skipping invalid history entry:', entry);
@@ -121,13 +109,12 @@ function processESIHistoryData(rawData) {
                 low: parseFloat(entry.lowest) || parseFloat(entry.average) || 0,
                 volume: parseInt(entry.volume) || 0,
                 order_count: parseInt(entry.order_count) || 0,
-                // Add some computed fields for analysis
                 spread: (parseFloat(entry.highest) || 0) - (parseFloat(entry.lowest) || 0),
                 timestamp: new Date(entry.date).getTime()
             };
         })
         .filter(entry => entry !== null)
-        .sort((a, b) => a.timestamp - b.timestamp); // Sort chronologically
+        .sort((a, b) => a.timestamp - b.timestamp);
 }
 
 /**
@@ -270,6 +257,6 @@ export function getHistoryCacheStatus() {
         totalRecords,
         oldestCacheAge: oldestCache < Date.now() ? Date.now() - oldestCache : 0,
         newestCacheAge: newestCache > 0 ? Date.now() - newestCache : 0,
-        memoryUsageEstimate: `~${Math.round((totalRecords * 150) / 1024)}KB` // Rough estimate
+        memoryUsageEstimate: `~${Math.round((totalRecords * 150) / 1024)}KB`
     };
 }

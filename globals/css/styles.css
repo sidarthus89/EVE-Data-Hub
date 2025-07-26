@@ -17,6 +17,11 @@ body {
     color: #b4b4b4;
 }
 
+body.market-search {
+    margin: 0 !important;
+    /* override safely */
+}
+
 
 .hidden {
     display: none !important;

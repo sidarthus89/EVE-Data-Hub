@@ -5,7 +5,7 @@ import { APP_CONFIG, appState, elements } from '../marketCore/marketConfig.js';
 import { regionSelector } from '../../../globals/js/regionSelector.js';
 import { fetchMarketOrders } from '../../../globals/js/esiAPI.js';
 import { fetchMarketHistory } from "..marketLogic/marketHistoryLogic.js";
-import { handleItemSelection } from '../marketLogic/itemDispatcher.js';
+import { loadItemView } from './marketDispatcher.js';
 import { drillDownToItem } from "../marketLogic/marketSearchLogic.js";
 import { renderScopedHistoryChart } from "../marketUI/historyUI.js";
 
@@ -22,7 +22,7 @@ export async function loadItemContext(typeID, regionName = "all") {
     regionSelector.setRegion(regionName);
     appState.selectedTypeID = typeID;
 
-    handleItemSelection(typeID);
+    loadItemView(typeID);
     drillDownToItem(typeID);
     elements.searchBox.value = "";
     hideregionSelectors(false);
